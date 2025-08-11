@@ -1,8 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom"; // ต้อง import Link ด้วยนะครับ
+import React, { useState } from "react";
+import CreateAccount from "./createAccount";
 
 function LoginPage() {
     const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
+
+    // ฟังก์ชันเปิด popup สมัครสมาชิก (ปิด popup login)
+    const openCreateAccount = () => {
+        setShowCreateAccountModal(true);
+    };
+
+    // ฟังก์ชันปิด popup สมัครสมาชิก (เปิด popup login)
+    const closeCreateAccount = () => {
+        setShowCreateAccountModal(false);
+    };
 
     return (
         <div>
@@ -15,9 +25,7 @@ function LoginPage() {
             <div className="login-form-container">
                 <form className="login-form">
                     <div className="mb-3">
-                        <label htmlFor="email" className="form-label">
-                            อีเมล
-                        </label>
+                        <label htmlFor="email" className="form-label">อีเมล</label>
                         <input
                             type="email"
                             id="email"
@@ -29,9 +37,7 @@ function LoginPage() {
                     </div>
 
                     <div className="mb-3">
-                        <label htmlFor="password" className="form-label">
-                            รหัสผ่าน
-                        </label>
+                        <label htmlFor="password" className="form-label">รหัสผ่าน</label>
                         <input
                             type="password"
                             id="password"
@@ -42,9 +48,7 @@ function LoginPage() {
                         />
                     </div>
 
-                    <button type="submit" className="btn btn-primary w-100">
-                        เข้าสู่ระบบ
-                    </button>
+                    <button type="submit" className="btn btn-primary w-100">เข้าสู่ระบบ</button>
 
                     <div className="text-divider text-center my-2">หรือเข้าสู่ระบบโดย</div>
 
@@ -75,36 +79,34 @@ function LoginPage() {
                         ยังไม่มีสมาชิก?{" "}
                         <span
                             style={{ color: "#ed1b2f", cursor: "pointer" }}
-                            onClick={() => setShowCreateAccountModal(true)}
+                            onClick={openCreateAccount}
                         >
                             สมัครสมาชิก
                         </span>
                     </div>
-
-                    {showCreateAccountModal && (
-                        <div
-                            className="modal fade show"
-                            style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-                        >
-                            <div className="modal-dialog" role="document">
-                                <div className="modal-content">
-                                    <div className="modal-header">
-                                        <h5 className="modal-title">สมัครสมาชิก</h5>
-                                        <button
-                                            type="button"
-                                            className="btn-close"
-                                            onClick={() => setShowCreateAccountModal(false)}
-                                        ></button>
-                                    </div>
-                                    <div className="modal-body">
-                                        <createAccount />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </form>
             </div>
+
+            {/* popup สมัครสมาชิก */}
+            {showCreateAccountModal && (
+                <div
+                    className="modal fade show"
+                    style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+                    onClick={closeCreateAccount}  // คลิกที่หลัง popup ให้ปิด
+                >
+                    <div
+                        className="modal-dialog"
+                        role="document"
+                        onClick={(e) => e.stopPropagation()} // หยุดการปิด popup เมื่อคลิกข้างใน
+                    >
+                        <div className="modal-content">
+                            <div className="modal-body">
+                                <CreateAccount onClose={closeCreateAccount} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
