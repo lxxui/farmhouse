@@ -1,4 +1,3 @@
-// BurgerCategory.jsx
 import React from "react";
 
 const BurgerCate = () => {
