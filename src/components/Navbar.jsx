@@ -281,16 +281,21 @@ const Navbar = () => {
             {/* Modal: แสดง LoginPage component */}
             {showPopup && (
                 <div
-                    className={`modal fade ${fadeIn ? "fade-in show" : "fade-out"}`}
-                    style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-                    onClick={closePopup}
+                    className="modal fade show"
+                    style={{
+                        display: "block",
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                    }}
+                    onMouseDown={onBackdropClick}
                 >
-                    <div
-                        className="modal-dialog"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="modal-content">
+                    <div className="modal-dialog" role="document" style={{ pointerEvents: "auto" }}>
+                        <div
+                            className="modal-content"
+                            ref={modalContentRef}
+                            onMouseDown={(e) => e.stopPropagation()}
+                        >
                             <div className="modal-body">
+                                {/* เรียกใช้งาน component check_user ที่คุณสร้างไว้ */}
                                 <LoginPage />
                             </div>
                         </div>
