@@ -89,9 +89,13 @@ app.post("/login", async (req, res) => {
     const name = email.slice(0, 2); // ตัวอย่างใช้ 2 ตัวแรกของ email
     res.json({ success: true, name });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ" });
+    console.error("Login error detail:", error);
+    res.status(500).json({
+      error: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ",
+      detail: error.message
+    });
   }
+
 });
 
 
