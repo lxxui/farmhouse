@@ -12,7 +12,7 @@ app.use(express.json());
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
+  password: process.env.DB_PASSWORD || '140244@Fai.',
   database: process.env.DB_NAME || 'db_web_farmhouse'  // ตั้งเป็นชื่อฐานข้อมูลของคุณ
 });
 
@@ -24,11 +24,11 @@ app.get('/', (req, res) => {
 // ดึงข้อมูล user ทั้งหมด
 app.get('/users', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM user'); // ชื่อตาราง user ตามที่คุณสร้าง
+    const [rows] = await pool.query('select * from user'); // ชื่อตาราง user ตามที่คุณสร้าง
     res.json(rows);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้' });
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้1' });
   }
 });
 
