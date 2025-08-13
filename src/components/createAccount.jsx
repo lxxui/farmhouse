@@ -8,6 +8,15 @@ function CreateAccount({ onClose }) {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [termsChecked, setTermsChecked] = useState(false);
 
+    const handleStep1Submit = (e) => {
+        e.preventDefault();
+        if (!termsChecked) {
+            alert("กรุณายอมรับข้อกำหนด");
+            return;
+        }
+        setStep(2);
+    };
+
     const handleStep2Submit = async (e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
