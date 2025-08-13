@@ -135,7 +135,7 @@ const Navbar = () => {
                             id="loginBtn"
                             onClick={(e) => {
                                 e.preventDefault();
-                                openPopup();
+                                setShowPopup(true);
                             }}
                         >
                             เข้าสู่ระบบ
