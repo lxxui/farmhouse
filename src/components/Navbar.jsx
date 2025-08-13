@@ -64,51 +64,134 @@ const Navbar = () => {
         }
     }, [showPopup]);
 
+
     return (
         <div className="container">
-            <nav className="navbar navbar-expand-lg navbar-custom">
-                <a href="/" className="navbar-brand">Logo</a>
-
-                <div className="ms-auto">
-                    {user ? (
-                        <span style={{ color: "white" }}>คุณ {user.name}</span>
-                    ) : (
-                        <span style={{ color: "white", cursor: "pointer" }} onClick={openPopup}>
-                            เข้าสู่ระบบ
-                        </span>
-                    )}
+            <nav className="navbar navbar-expand-lg navbar-custom d-flex align-items-center flex-wrap">
+                <div id="clickable-image" className="logo">
+                    <a href="/" className="d-inline-block">
+                        <img
+                            src="/image/logo_top.png"
+                            alt="ขนมปัง"
+                            className="img-fluid"
+                            style={{ maxHeight: 50 }}
+                        />
+                    </a>
                 </div>
+                {/* Hamburger toggle */}
+                <button
+                    className="navbar-toggler"
+                    type="button"
+                    onClick={toggleMenu}
+                    aria-controls="navbarSupportedContent"
+                    aria-expanded={menuOpen}
+                    aria-label="Toggle navigation"
+                    style={{ border: "none", background: "transparent", color: "white" }}
+                >
+                    <i className="bi bi-list" style={{ fontSize: "1.5rem" }}></i>
+                </button>
 
-                {/* Modal Login */}
-                {showPopup && (
+
+
+                <div
+                    className={`collapse navbar-collapse ${menuOpen ? "show" : ""}`}
+                    id="navbarSupportedContent"
+                    style={collapsedMenuStyle}
+                >
+                    {/* ลองเพิ่ม w-100 และเปลี่ยนเป็น justify-content-end */}
                     <div
-                        className={`modal fade ${fadeIn ? "fade-in show" : "fade-out"}`}
-                        style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-                        onClick={onBackdropClick}
+                        className="d-flex align-items-center menu-items-container w-100 justify-content-end"
+                        style={{ gap: 10, flexWrap: "nowrap", flexDirection: "row" }}
                     >
-                        <div className="modal-dialog" ref={modalContentRef} onClick={(e) => e.stopPropagation()}>
-                            <div className="modal-content">
-                                <div className="modal-body">
-                                    <LoginPage onLogin={handleLogin} />
-                                </div>
-                            </div>
+                        {/* ช่องค้นหา */}
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="ค้นหาสินค้า / Search products"
+                            lang="th"
+                            autoComplete="off"
+                            autoCorrect="off"
+                            autoCapitalize="off"
+                            spellCheck="false"
+                            style={{ width: 250, minWidth: 150 }}
+                        />
+
+                        {/* ปุ่มเปลี่ยนภาษา */}
+                        {/* <div style={{ cursor: "pointer", color: "white", fontSize: 16, userSelect: "none", display: "flex", gap: "10px", alignItems: "center" }}>
+                            <span
+                                onClick={() => setLang("TH")}
+                                style={{
+                                    textDecoration: lang === "TH" ? "underline" : "none",
+                                    fontWeight: lang === "TH" ? "bold" : "normal",
+                                }}
+                            >
+                                TH
+                            </span>
+                            <span>|</span>
+                            <span
+                                onClick={() => setLang("EN")}
+                                style={{
+                                    textDecoration: lang === "EN" ? "underline" : "none",
+                                    fontWeight: lang === "EN" ? "bold" : "normal",
+                                }}
+                            >
+                                EN
+                            </span>
+                        </div> */}
+
+
+                        {/* ปุ่มเข้าสู่ระบบ */}
+                        <a
+                            href="/login"
+                            className="text-white text-decoration-none"
+                            style={{ fontSize: 16 }}
+                            id="loginBtn"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                openPopup();
+                            }}
+                        >
+                            เข้าสู่ระบบ
+                        </a>
+
+                        <div className="ms-auto">
+                            {user ? (
+                                <span style={{ color: "white" }}>คุณ {user.name}</span>
+                            ) : (
+                                <span style={{ color: "white", cursor: "pointer" }} onClick={openPopup}>
+                                    เข้าสู่ระบบ
+                                </span>
+                            )}
+                        </div>
+
+
+                        {/* ตะกร้าสินค้า */}
+                        <div
+                            className="cart-icon position-relative"
+                            style={{ fontSize: 24, color: "white", cursor: "pointer" }}
+                        >
+                            <i className="fas fa-shopping-cart"></i>
+                            <span className="cart-count btn-cart position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                            </span>
                         </div>
                     </div>
-                )}
+                </div>
+
             </nav>
 
-            {/* ปุ่มตรวจสอบสถานะ */}
+            {/*ตรวจสอบสถานะคำสั่งซื้อ*/}
             <button
                 type="button"
-                className="btn btn-danger"
+                className="btn btn-danger"  // ใช้คลาส bootstrap สีแดง
                 style={{
                     position: "fixed",
                     bottom: "20px",
                     right: "20px",
                     zIndex: 1000,
-                    borderRadius: "50px",
-                    padding: "10px 20px",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    borderRadius: "50px",  // ทำให้โค้งมนมาก ๆ
+                    padding: "10px 20px",  // กำหนดขนาดปุ่มให้ดูดี
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)", // เงานิดๆให้ลอยเด่น
                 }}
                 onClick={() => navigate("/checkStatus")}
             >
