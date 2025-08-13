@@ -1,19 +1,20 @@
 // src/components/navbar.jsx
 import React, { useState, useEffect, useRef } from "react";
-import LoginPage from "./loginpage"
+import LoginPage from "./loginpage";
 import { useNavigate } from "react-router-dom";
-import checkStatus from "./checkStatus"
-
+import checkStatus from "./checkStatus";
 
 const Navbar = () => {
     const [activeSubmenu, setActiveSubmenu] = useState(null);
     const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-    const [menuOpen, setMenuOpen] = useState(false); // toggle hamburger menu
-    const [showPopup, setShowPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [showPopup, setShowPopup] = useState(false);
     const [lang, setLang] = useState("TH");
-
+    const [user, setUser] = useState(null); // ✅ state เก็บข้อมูล user
+    const [fadeIn, setFadeIn] = useState(false);
 
     const modalContentRef = useRef(null);
+    const navigate = useNavigate();
 
     const handleSubmenuClick = (submenu) => {
         setActiveSubmenu((prev) => (prev === submenu ? null : submenu));
@@ -27,6 +28,12 @@ const Navbar = () => {
         setMenuOpen((prev) => !prev);
     };
 
+    // ✅ ฟังก์ชันนี้จะรับข้อมูลจาก LoginPage เมื่อ login สำเร็จ
+    const handleLogin = (userData) => {
+        setUser(userData); // { email, name }
+        closePopup();
+    };
+
     // ปิด modal ด้วยปุ่ม Esc
     useEffect(() => {
         const onKey = (e) => {
@@ -36,22 +43,11 @@ const Navbar = () => {
         return () => window.removeEventListener("keydown", onKey);
     }, [showPopup]);
 
-    // ถ้าคลิกบริเวณ backdrop จะปิด modal
     const onBackdropClick = (e) => {
-        // ถ้าคลิกตรงนอก content ให้ปิด
         if (modalContentRef.current && !modalContentRef.current.contains(e.target)) {
             setShowPopup(false);
         }
     };
-
-    const collapsedMenuStyle = {
-        flexBasis: "auto",
-        justifyContent: "flex-start",
-    };
-
-    const navigate = useNavigate();
-
-    const [fadeIn, setFadeIn] = useState(false);
 
     const openPopup = () => {
         setShowPopup(true);
@@ -59,7 +55,7 @@ const Navbar = () => {
 
     const closePopup = () => {
         setFadeIn(false);
-        setTimeout(() => setShowPopup(false), 300); // รอ animation ก่อนซ่อนจริง
+        setTimeout(() => setShowPopup(false), 300);
     };
 
     useEffect(() => {
@@ -67,7 +63,6 @@ const Navbar = () => {
             setTimeout(() => setFadeIn(true), 10);
         }
     }, [showPopup]);
-
 
     return (
         <div className="container">
@@ -102,18 +97,18 @@ const Navbar = () => {
                 )}
             </nav>
 
-            {/*ตรวจสอบสถานะคำสั่งซื้อ*/}
+            {/* ปุ่มตรวจสอบสถานะ */}
             <button
                 type="button"
-                className="btn btn-danger"  // ใช้คลาส bootstrap สีแดง
+                className="btn btn-danger"
                 style={{
                     position: "fixed",
                     bottom: "20px",
                     right: "20px",
                     zIndex: 1000,
-                    borderRadius: "50px",  // ทำให้โค้งมนมาก ๆ
-                    padding: "10px 20px",  // กำหนดขนาดปุ่มให้ดูดี
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)", // เงานิดๆให้ลอยเด่น
+                    borderRadius: "50px",
+                    padding: "10px 20px",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
                 }}
                 onClick={() => navigate("/checkStatus")}
             >
