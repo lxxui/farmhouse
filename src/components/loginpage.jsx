@@ -1,27 +1,22 @@
 import React, { useState, useEffect } from "react";
 import CreateAccount from "./createAccount";
 
-function LoginPage() {
+function LoginPage({ onLoginSuccess, onClose }) {
     const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
     const [fadeIn, setFadeIn] = useState(false);
 
-    const openCreateAccount = () => {
-        setShowCreateAccountModal(true);
-    };
-
+    const openCreateAccount = () => setShowCreateAccountModal(true);
     const closeCreateAccount = () => {
         setFadeIn(false);
-        setTimeout(() => setShowCreateAccountModal(false), 300); // รอ animation จบก่อนซ่อน
+        setTimeout(() => setShowCreateAccountModal(false), 300);
     };
 
     useEffect(() => {
-        if (showCreateAccountModal) {
-            setTimeout(() => setFadeIn(true), 10);
-        }
+        if (showCreateAccountModal) setTimeout(() => setFadeIn(true), 10);
     }, [showCreateAccountModal]);
 
     const handleLogin = async (e) => {
-        e.preventDefault(); // ป้องกัน reload หน้า
+        e.preventDefault();
 
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
@@ -36,15 +31,8 @@ function LoginPage() {
             const data = await res.json();
 
             if (data.success) {
-                alert("เข้าสู่ระบบสำเร็จ!"); // แสดง alert
-                console.log("User name:", data.name);
-
-                // ส่งข้อมูล user กลับ Navbar
-                if (props.onLoginSuccess) {
-                    props.onLoginSuccess({ name: data.name });
-                }
-
-                if (props.onClose) props.onClose(); // ปิด modal
+                onLoginSuccess && onLoginSuccess({ name: data.name });
+                onClose && onClose();
             } else {
                 alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
             }
@@ -53,7 +41,6 @@ function LoginPage() {
             alert("เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
         }
     };
-
 
     return (
         <div>
@@ -73,7 +60,6 @@ function LoginPage() {
                             className="form-control"
                             placeholder="กรอกอีเมล"
                             required
-                            autoComplete="current-password"
                         />
                     </div>
 
@@ -85,7 +71,6 @@ function LoginPage() {
                             className="form-control"
                             placeholder="กรอกรหัสผ่าน"
                             required
-                            autoComplete="current-password"
                         />
                     </div>
 
@@ -130,7 +115,6 @@ function LoginPage() {
                 </form>
             </div>
 
-            {/* popup สมัครสมาชิก */}
             {showCreateAccountModal && (
                 <div
                     className={`modal fade ${fadeIn ? "show fade-in" : "fade-out"}`}
