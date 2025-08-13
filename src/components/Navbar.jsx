@@ -15,6 +15,12 @@ const Navbar = () => {
 
     const modalContentRef = useRef(null);
 
+    // ฟังก์ชัน logout
+    const handleLogout = () => {
+        setUser(null);        // ล้างข้อมูล user
+        navigate("/");        // กลับหน้าแรก
+    };
+
     const handleSubmenuClick = (submenu) => {
         setActiveSubmenu((prev) => (prev === submenu ? null : submenu));
     };
