@@ -40,3 +40,15 @@ body {
     transform: rotate(360deg);
   }
 }
+
+.modal.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.modal.fade-out {
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}

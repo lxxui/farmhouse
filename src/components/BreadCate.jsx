@@ -104,7 +104,7 @@ const BreadMenu = () => {
                   <i className="fas fa-weight-hanging me-1"></i> {weight}
                 </p>
                 <button
-                  className="btn btn-success"
+                  className="btn btn-danger"
                   style={{ borderRadius: 25 }}
                 >
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า

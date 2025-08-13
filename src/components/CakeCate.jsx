@@ -80,7 +80,7 @@ const CakeCate = () => {
                 <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: "1rem" }}>
                   <i className="fas fa-weight-hanging me-1"></i> {weight}
                 </p>
-                <button className="btn btn-success" style={{ borderRadius: 25 }}>
+                <button className="btn btn-danger" style={{ borderRadius: 25 }}>
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
                 </button>
               </div>

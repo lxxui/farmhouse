@@ -40,7 +40,7 @@ const HotdogCate = () => {
               <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: "1rem" }}>
                 <i className="fas fa-weight-hanging me-1"></i> 270 กรัม
               </p>
-              <button className="btn btn-success" style={{ borderRadius: 25 }}>
+              <button className="btn btn-danger" style={{ borderRadius: 25 }}>
                 <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
               </button>
             </div>
@@ -71,7 +71,7 @@ const HotdogCate = () => {
               <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: "1rem" }}>
                 <i className="fas fa-weight-hanging me-1"></i> 320 กรัม
               </p>
-              <button className="btn btn-success" style={{ borderRadius: 25 }}>
+              <button className="btn btn-danger" style={{ borderRadius: 25 }}>
                 <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
               </button>
             </div>

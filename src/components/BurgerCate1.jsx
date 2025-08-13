@@ -109,7 +109,7 @@ const BurgerCate1 = () => {
                   </p>
                 )}
 
-                <button className="btn btn-success" style={{ borderRadius: 25 }}>
+                <button className="btn btn-danger" style={{ borderRadius: 25 }}>
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
                 </button>
               </div>
