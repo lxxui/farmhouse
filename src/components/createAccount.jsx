@@ -89,6 +89,17 @@ function CreateAccount({ onClose }) {
                             />
                         </div>
 
+                        {/* ข้อความข้อกำหนดที่นี่ */}
+                        <div className="mb-3" style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+                            <p>ข้อกำหนดและเงื่อนไข:</p>
+                            <ol>
+                                <li>ข้าพเจ้ายินยอมให้เก็บข้อมูลส่วนตัว เช่น อีเมล และเบอร์โทรศัพท์ เพื่อใช้สำหรับส่งข้อมูลข่าวสารและการจัดส่งสินค้า</li>
+                                <li>ข้อมูลที่ให้จะถูกเก็บรักษาอย่างปลอดภัยและจะไม่ถูกเปิดเผยต่อบุคคลภายนอกโดยไม่ได้รับอนุญาต</li>
+                                <li>ผู้ใช้ต้องรับผิดชอบข้อมูลที่ให้เป็นความจริงและถูกต้อง</li>
+                            </ol>
+                        </div>
+
+
                         <div className="form-check mb-3">
                             <input
                                 type="checkbox"
@@ -107,6 +118,7 @@ function CreateAccount({ onClose }) {
                         </button>
                     </form>
                 )}
+
 
                 {step === 2 && (
                     <form onSubmit={handleStep2Submit}>
