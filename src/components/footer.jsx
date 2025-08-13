@@ -61,6 +61,14 @@ const Footer = () => {
               </a>
             </p>
           </div>
+
+          {/* ข้อความ developer */}
+          <div className="w-100 mt-1">
+            <p className="mb-0 text-center" style={{ fontSize: "0.9rem", opacity: 0.8 }}>
+              Develop by nari.systemdeverlopemen 1
+            </p>
+          </div>
+          
         </div>
       </div>
     </footer>
