@@ -3,15 +3,38 @@ import CreateAccount from "./createAccount";
 
 function LoginPage() {
     const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
 
-    // ฟังก์ชันเปิด popup สมัครสมาชิก (ปิด popup login)
-    const openCreateAccount = () => {
-        setShowCreateAccountModal(true);
-    };
+    const openCreateAccount = () => setShowCreateAccountModal(true);
+    const closeCreateAccount = () => setShowCreateAccountModal(false);
 
-    // ฟังก์ชันปิด popup สมัครสมาชิก (เปิด popup login)
-    const closeCreateAccount = () => {
-        setShowCreateAccountModal(false);
+    const handleSubmit = async (e) => {
+        e.preventDefault(); // ป้องกัน form reload หน้า
+
+        try {
+            const response = await fetch("http://localhost:3001/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log("Login success:", data);
+                setError("");
+                alert(`Login สำเร็จ! ยินดีต้อนรับ ${data.name}`);
+                // ตัวอย่าง redirect ไปหน้าหลัก
+                // window.location.href = "/dashboard";
+            } else {
+                setError(data.error || "เกิดข้อผิดพลาด");
+            }
+        } catch (err) {
+            console.error("Error:", err);
+            setError("ไม่สามารถเชื่อมต่อกับ server");
+        }
     };
 
     return (
@@ -23,7 +46,7 @@ function LoginPage() {
             </div>
 
             <div className="login-form-container">
-                <form className="login-form">
+                <form className="login-form" onSubmit={handleSubmit}>
                     <div className="mb-3">
                         <label htmlFor="email" className="form-label">อีเมล</label>
                         <input
@@ -32,7 +55,8 @@ function LoginPage() {
                             className="form-control"
                             placeholder="กรอกอีเมล"
                             required
-                            autoComplete="current-password"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
 
@@ -44,46 +68,14 @@ function LoginPage() {
                             className="form-control"
                             placeholder="กรอกรหัสผ่าน"
                             required
-                            autoComplete="current-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
 
+                    {error && <div className="text-danger mb-3">{error}</div>}
+
                     <button type="submit" className="btn btn-primary w-100">เข้าสู่ระบบ</button>
-
-                    <div className="text-divider text-center my-2">หรือเข้าสู่ระบบโดย</div>
-
-                    <div className="row g-2 text-center mt-2">
-                        <div className="col-6">
-                            <a
-                                href="https://accounts.google.com/"
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-outline-danger w-100"
-                            >
-                                <i className="fab fa-google me-2"></i> Google
-                            </a>
-                        </div>
-                        <div className="col-6">
-                            <a
-                                href="https://www.facebook.com/"
-                                target="_blank"
-                                rel="noreferrer"
-                                className="btn btn-outline-primary w-100"
-                            >
-                                <i className="fab fa-facebook-f me-2"></i> Facebook
-                            </a>
-                        </div>
-                    </div>
-
-                    <div className="text-center mt-4">
-                        ยังไม่มีสมาชิก?{" "}
-                        <span
-                            style={{ color: "#ed1b2f", cursor: "pointer" }}
-                            onClick={openCreateAccount}
-                        >
-                            สมัครสมาชิก
-                        </span>
-                    </div>
                 </form>
             </div>
 
@@ -92,12 +84,12 @@ function LoginPage() {
                 <div
                     className="modal fade show"
                     style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-                    onClick={closeCreateAccount}  // คลิกที่หลัง popup ให้ปิด
+                    onClick={closeCreateAccount}
                 >
                     <div
                         className="modal-dialog"
                         role="document"
-                        onClick={(e) => e.stopPropagation()} // หยุดการปิด popup เมื่อคลิกข้างใน
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <div className="modal-content">
                             <div className="modal-body">

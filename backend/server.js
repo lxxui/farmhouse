@@ -63,21 +63,35 @@ app.post('/register', async (req, res) => {
 });
 
 // login API
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-
-  const query = "SELECT * FROM user WHERE email = ? AND password = ?";
-  db.query(query, [email, password], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-
-    if (results.length > 0) {
-      // เอา 2 ตัวแรกของ email เป็นชื่อ
-      const name = email.slice(0, 2);
-      res.json({ success: true, name });
-    } else {
-      res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+// login API
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" });
     }
-  });
+
+    // ดึงผู้ใช้จากฐานข้อมูล
+    const [rows] = await pool.query("SELECT * FROM user WHERE email = ?", [email]);
+    if (rows.length === 0) {
+      return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+    }
+
+    const user = rows[0];
+
+    // ตรวจสอบรหัสผ่าน
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+      return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+    }
+
+    // ส่งข้อมูลกลับ ฟรอนต์เอนด์
+    const name = email.slice(0, 2); // ตัวอย่างใช้ 2 ตัวแรกของ email
+    res.json({ success: true, name });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ" });
+  }
 });
 
 
