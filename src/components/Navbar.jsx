@@ -11,7 +11,7 @@ const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false); // toggle hamburger menu
     const [showPopup, setShowPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
     const [lang, setLang] = useState("TH");
-
+    const [user, setUser] = useState(null);
 
     const modalContentRef = useRef(null);
 
