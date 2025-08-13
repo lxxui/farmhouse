@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 
 function CreateAccount({ onClose }) {
+    const [step, setStep] = useState(1);
+    const [email, setEmail] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [termsChecked, setTermsChecked] = useState(false);
+
     const handleStep2Submit = async (e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
