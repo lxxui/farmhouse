@@ -21,25 +21,23 @@ function LoginPage() {
         const password = e.target.password.value;
 
         try {
-            const response = await fetch("/api/login", {
+            const response = await fetch("http://localhost:3001/login", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email, password }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                alert("เข้าสู่ระบบสำเร็จ!");
-                // สามารถ redirect หรือเก็บ token ได้
+                alert(`เข้าสู่ระบบสำเร็จ! ยินดีต้อนรับ ${data.name}`);
             } else {
-                alert(data.message || "เข้าสู่ระบบไม่สำเร็จ");
+                alert(data.error || "เข้าสู่ระบบไม่สำเร็จ");
             }
+
         } catch (error) {
-            console.error("Login error:", error);
-            alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
+            console.error("Login fetch error:", error);
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
         }
     };
 
