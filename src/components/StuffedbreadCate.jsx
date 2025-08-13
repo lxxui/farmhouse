@@ -40,9 +40,9 @@ const StuffedBreadCate = () => {
   ];
 
   return (
-    <div data-id="4" className="container mt-5 mb-5">
+    <div data-id="4" className="container mt-3 mb-5">
       <h4
-        className="mt-5 mb-3"
+        className="mt-3 mb-3"
         style={{ borderLeft: "5px solid #ed1b2f", paddingLeft: 10, fontWeight: "bold" }}
       >
         🥪 ขนมปังสอดไส้
