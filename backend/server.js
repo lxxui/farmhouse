@@ -62,6 +62,25 @@ app.post('/register', async (req, res) => {
   }
 });
 
+// login API
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+
+  const query = "SELECT * FROM user WHERE email = ? AND password = ?";
+  db.query(query, [email, password], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (results.length > 0) {
+      // เอา 2 ตัวแรกของ email เป็นชื่อ
+      const name = email.slice(0, 2);
+      res.json({ success: true, name });
+    } else {
+      res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+    }
+  });
+});
+
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
