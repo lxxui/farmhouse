@@ -1,45 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import CreateAccount from "./createAccount";
 
-function LoginPage({ onLoginSuccess, onClose }) {
+function LoginPage() {
     const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
-    const [fadeIn, setFadeIn] = useState(false);
 
-    const openCreateAccount = () => setShowCreateAccountModal(true);
-    const closeCreateAccount = () => {
-        setFadeIn(false);
-        setTimeout(() => setShowCreateAccountModal(false), 300);
+    // ฟังก์ชันเปิด popup สมัครสมาชิก (ปิด popup login)
+    const openCreateAccount = () => {
+        setShowCreateAccountModal(true);
     };
 
-    useEffect(() => {
-        if (showCreateAccountModal) setTimeout(() => setFadeIn(true), 10);
-    }, [showCreateAccountModal]);
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
-
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-
-        try {
-            const res = await fetch("/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data = await res.json();
-
-            if (data.success) {
-                onLoginSuccess && onLoginSuccess({ name: data.name });
-                onClose && onClose();
-            } else {
-                alert("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-            }
-        } catch (err) {
-            console.error(err);
-            alert("เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
-        }
+    // ฟังก์ชันปิด popup สมัครสมาชิก (เปิด popup login)
+    const closeCreateAccount = () => {
+        setShowCreateAccountModal(false);
     };
 
     return (
@@ -51,7 +23,7 @@ function LoginPage({ onLoginSuccess, onClose }) {
             </div>
 
             <div className="login-form-container">
-                <form className="login-form" onSubmit={handleLogin}>
+                <form className="login-form">
                     <div className="mb-3">
                         <label htmlFor="email" className="form-label">อีเมล</label>
                         <input
@@ -60,6 +32,7 @@ function LoginPage({ onLoginSuccess, onClose }) {
                             className="form-control"
                             placeholder="กรอกอีเมล"
                             required
+                            autoComplete="current-password"
                         />
                     </div>
 
@@ -71,12 +44,11 @@ function LoginPage({ onLoginSuccess, onClose }) {
                             className="form-control"
                             placeholder="กรอกรหัสผ่าน"
                             required
+                            autoComplete="current-password"
                         />
                     </div>
 
-                    <button type="submit" className="btn btn-primary w-100">
-                        เข้าสู่ระบบ
-                    </button>
+                    <button type="submit" className="btn btn-primary w-100">เข้าสู่ระบบ</button>
 
                     <div className="text-divider text-center my-2">หรือเข้าสู่ระบบโดย</div>
 
@@ -115,16 +87,17 @@ function LoginPage({ onLoginSuccess, onClose }) {
                 </form>
             </div>
 
+            {/* popup สมัครสมาชิก */}
             {showCreateAccountModal && (
                 <div
-                    className={`modal fade ${fadeIn ? "show fade-in" : "fade-out"}`}
+                    className="modal fade show"
                     style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-                    onClick={closeCreateAccount}
+                    onClick={closeCreateAccount}  // คลิกที่หลัง popup ให้ปิด
                 >
                     <div
                         className="modal-dialog"
                         role="document"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()} // หยุดการปิด popup เมื่อคลิกข้างใน
                     >
                         <div className="modal-content">
                             <div className="modal-body">
