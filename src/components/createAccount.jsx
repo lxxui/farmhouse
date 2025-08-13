@@ -1,129 +1,132 @@
 import React, { useState } from "react";
 
 function CreateAccount({ onClose }) {
-  const [step, setStep] = useState(1);
+    const handleStep2Submit = async (e) => {
+        e.preventDefault();
+        if (password !== confirmPassword) {
+            alert("รหัสผ่านไม่ตรงกัน");
+            return;
+        }
+        if (password.length < 6) {
+            alert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+            return;
+        }
 
-  // ข้อมูลฟอร์ม
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [termsChecked, setTermsChecked] = useState(false);
+        try {
+            const response = await fetch('http://localhost:3001/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    phone: phoneNumber,
+                    password,
+                }),
+            });
 
-  // ฟังก์ชันขั้นตอน 1: กรอก email + phone
-  const handleStep1Submit = (e) => {
-    e.preventDefault();
-    if (!termsChecked) {
-      alert("กรุณายอมรับข้อกำหนด");
-      return;
-    }
-    setStep(2); // ไปหน้าตั้งรหัสผ่าน
-  };
+            const data = await response.json();
 
-  // ฟังก์ชันขั้นตอน 2: ตั้งรหัสผ่าน
-  const handleStep2Submit = (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      alert("รหัสผ่านไม่ตรงกัน");
-      return;
-    }
-    if (password.length < 6) {
-      alert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
-      return;
-    }
-    alert("สมัครสมาชิกสำเร็จ");
-    onClose();
-  };
+            if (response.ok) {
+                alert("สมัครสมาชิกสำเร็จ");
+                onClose();
+            } else {
+                alert(`สมัครสมาชิกไม่สำเร็จ: ${data.error || 'เกิดข้อผิดพลาด'}`);
+            }
+        } catch (error) {
+            alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
+            console.error(error);
+        }
+    };
+    return (
+        <div className="p-3" style={{ maxWidth: 400, margin: "0 auto" }}>
+            {step === 1 && (
+                <form onSubmit={handleStep1Submit}>
+                    <h2 className="mb-4 text-center">สมัครสมาชิก</h2>
 
-  return (
-    <div className="p-3" style={{ maxWidth: 400, margin: "0 auto" }}>
-      {step === 1 && (
-        <form onSubmit={handleStep1Submit}>
-          <h2 className="mb-4 text-center">สมัครสมาชิก</h2>
+                    <div className="mb-3">
+                        <input
+                            type="email"
+                            placeholder="อีเมล"
+                            className="form-control"
+                            value={email}
+                            required
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
 
-          <div className="mb-3">
-            <input
-              type="email"
-              placeholder="อีเมล"
-              className="form-control"
-              value={email}
-              required
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+                    <div className="mb-3">
+                        <input
+                            type="text"
+                            placeholder="เบอร์โทรศัพท์"
+                            className="form-control"
+                            value={phoneNumber}
+                            required
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                        />
+                    </div>
 
-          <div className="mb-3">
-            <input
-              type="text"
-              placeholder="เบอร์โทรศัพท์"
-              className="form-control"
-              value={phoneNumber}
-              required
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-          </div>
+                    <div className="form-check mb-3">
+                        <input
+                            type="checkbox"
+                            className="form-check-input"
+                            id="termsCheckbox"
+                            checked={termsChecked}
+                            onChange={() => setTermsChecked(!termsChecked)}
+                        />
+                        <label className="form-check-label" htmlFor="termsCheckbox">
+                            ยอมรับข้อกำหนดและเงื่อนไข
+                        </label>
+                    </div>
 
-          <div className="form-check mb-3">
-            <input
-              type="checkbox"
-              className="form-check-input"
-              id="termsCheckbox"
-              checked={termsChecked}
-              onChange={() => setTermsChecked(!termsChecked)}
-            />
-            <label className="form-check-label" htmlFor="termsCheckbox">
-              ยอมรับข้อกำหนดและเงื่อนไข
-            </label>
-          </div>
+                    <button type="submit" className="btn btn-primary w-100">
+                        ถัดไป
+                    </button>
+                </form>
+            )}
 
-          <button type="submit" className="btn btn-primary w-100">
-            ถัดไป
-          </button>
-        </form>
-      )}
+            {step === 2 && (
+                <form onSubmit={handleStep2Submit}>
+                    <h2 className="mb-4 text-center">ตั้งรหัสผ่าน</h2>
 
-      {step === 2 && (
-        <form onSubmit={handleStep2Submit}>
-          <h2 className="mb-4 text-center">ตั้งรหัสผ่าน</h2>
+                    <div className="mb-3">
+                        <input
+                            type="password"
+                            placeholder="รหัสผ่าน"
+                            className="form-control"
+                            value={password}
+                            required
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
 
-          <div className="mb-3">
-            <input
-              type="password"
-              placeholder="รหัสผ่าน"
-              className="form-control"
-              value={password}
-              required
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+                    <div className="mb-3">
+                        <input
+                            type="password"
+                            placeholder="ยืนยันรหัสผ่าน"
+                            className="form-control"
+                            value={confirmPassword}
+                            required
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                    </div>
 
-          <div className="mb-3">
-            <input
-              type="password"
-              placeholder="ยืนยันรหัสผ่าน"
-              className="form-control"
-              value={confirmPassword}
-              required
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-
-          <div className="d-flex justify-content-between">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => setStep(1)}
-            >
-              กลับ
-            </button>
-            <button type="submit" className="btn btn-primary">
-              สมัครสมาชิก
-            </button>
-          </div>
-        </form>
-      )}
-    </div>
-  );
+                    <div className="d-flex justify-content-between">
+                        <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => setStep(1)}
+                        >
+                            กลับ
+                        </button>
+                        <button type="submit" className="btn btn-primary">
+                            สมัครสมาชิก
+                        </button>
+                    </div>
+                </form>
+            )}
+        </div>
+    );
 }
 
 export default CreateAccount;
