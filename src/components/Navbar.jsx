@@ -106,16 +106,10 @@ const Navbar = () => {
                         className="d-flex align-items-center menu-items-container w-100 justify-content-end"
                         style={{ gap: 10, flexWrap: "nowrap", flexDirection: "row" }}
                     >
-                        {/* ช่องค้นหา */}
                         <input
                             type="text"
                             className="form-control"
                             placeholder="ค้นหาสินค้า / Search products"
-                            lang="th"
-                            autoComplete="off"
-                            autoCorrect="off"
-                            autoCapitalize="off"
-                            spellCheck="false"
                             style={{ width: 250, minWidth: 150 }}
                         />
 
