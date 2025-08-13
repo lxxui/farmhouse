@@ -27,18 +27,20 @@ function LoginPage() {
                 body: JSON.stringify({ email, password })
             });
 
-            const data = await response.json();
+            const text = await response.text(); // แก้เป็น text ก่อน
+            let data;
+            try { data = JSON.parse(text); } catch { data = text; } // ถ้าไม่ใช่ JSON ก็เก็บ text
 
-            if (response.ok) {
+            if (response.ok && data.success) {
                 alert(`เข้าสู่ระบบสำเร็จ! ยินดีต้อนรับ ${data.name}`);
             } else {
                 alert(data.error || "เข้าสู่ระบบไม่สำเร็จ");
             }
-
         } catch (error) {
             console.error("Login fetch error:", error);
             alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
         }
+
     };
 
     return (
