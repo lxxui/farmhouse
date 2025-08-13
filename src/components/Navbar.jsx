@@ -51,6 +51,23 @@ const Navbar = () => {
 
     const navigate = useNavigate();
 
+    const [fadeIn, setFadeIn] = useState(false);
+
+    const openPopup = () => {
+        setShowPopup(true);
+    };
+
+    const closePopup = () => {
+        setFadeIn(false);
+        setTimeout(() => setShowPopup(false), 300); // รอ animation ก่อนซ่อนจริง
+    };
+
+    useEffect(() => {
+        if (showPopup) {
+            setTimeout(() => setFadeIn(true), 10);
+        }
+    }, [showPopup]);
+
 
     return (
         <div className="container">
@@ -135,7 +152,7 @@ const Navbar = () => {
                             id="loginBtn"
                             onClick={(e) => {
                                 e.preventDefault();
-                                setShowPopup(true);
+                                openPopup();
                             }}
                         >
                             เข้าสู่ระบบ
