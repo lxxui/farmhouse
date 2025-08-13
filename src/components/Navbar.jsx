@@ -51,6 +51,23 @@ const Navbar = () => {
 
     const navigate = useNavigate();
 
+    const [fadeIn, setFadeIn] = useState(false);
+
+    const openPopup = () => {
+        setShowPopup(true);
+    };
+
+    const closePopup = () => {
+        setFadeIn(false);
+        setTimeout(() => setShowPopup(false), 300); // รอ animation ก่อนซ่อนจริง
+    };
+
+    useEffect(() => {
+        if (showPopup) {
+            setTimeout(() => setFadeIn(true), 10);
+        }
+    }, [showPopup]);
+
 
     return (
         <div className="container">
@@ -103,30 +120,6 @@ const Navbar = () => {
                             style={{ width: 250, minWidth: 150 }}
                         />
 
-                        {/* ปุ่มเปลี่ยนภาษา */}
-                        {/* <div style={{ cursor: "pointer", color: "white", fontSize: 16, userSelect: "none", display: "flex", gap: "10px", alignItems: "center" }}>
-                            <span
-                                onClick={() => setLang("TH")}
-                                style={{
-                                    textDecoration: lang === "TH" ? "underline" : "none",
-                                    fontWeight: lang === "TH" ? "bold" : "normal",
-                                }}
-                            >
-                                TH
-                            </span>
-                            <span>|</span>
-                            <span
-                                onClick={() => setLang("EN")}
-                                style={{
-                                    textDecoration: lang === "EN" ? "underline" : "none",
-                                    fontWeight: lang === "EN" ? "bold" : "normal",
-                                }}
-                            >
-                                EN
-                            </span>
-                        </div> */}
-
-
                         {/* ปุ่มเข้าสู่ระบบ */}
                         <a
                             href="/login"
@@ -135,7 +128,7 @@ const Navbar = () => {
                             id="loginBtn"
                             onClick={(e) => {
                                 e.preventDefault();
-                                setShowPopup(true);
+                                openPopup();
                             }}
                         >
                             เข้าสู่ระบบ
@@ -153,7 +146,6 @@ const Navbar = () => {
                         </div>
                     </div>
                 </div>
-
             </nav>
 
             {/*ตรวจสอบสถานะคำสั่งซื้อ*/}
@@ -281,21 +273,16 @@ const Navbar = () => {
             {/* Modal: แสดง LoginPage component */}
             {showPopup && (
                 <div
-                    className="modal fade show"
-                    style={{
-                        display: "block",
-                        backgroundColor: "rgba(0,0,0,0.5)",
-                    }}
-                    onMouseDown={onBackdropClick}
+                    className={`modal fade ${fadeIn ? "fade-in show" : "fade-out"}`}
+                    style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+                    onClick={closePopup}
                 >
-                    <div className="modal-dialog" role="document" style={{ pointerEvents: "auto" }}>
-                        <div
-                            className="modal-content"
-                            ref={modalContentRef}
-                            onMouseDown={(e) => e.stopPropagation()}
-                        >
+                    <div
+                        className="modal-dialog"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="modal-content">
                             <div className="modal-body">
-                                {/* เรียกใช้งาน component check_user ที่คุณสร้างไว้ */}
                                 <LoginPage />
                             </div>
                         </div>
