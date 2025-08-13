@@ -1,20 +1,19 @@
 // src/components/navbar.jsx
 import React, { useState, useEffect, useRef } from "react";
-import LoginPage from "./loginpage";
+import LoginPage from "./loginpage"
 import { useNavigate } from "react-router-dom";
-import checkStatus from "./checkStatus";
+import checkStatus from "./checkStatus"
+
 
 const Navbar = () => {
     const [activeSubmenu, setActiveSubmenu] = useState(null);
     const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [showPopup, setShowPopup] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false); // toggle hamburger menu
+    const [showPopup, setShowPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
     const [lang, setLang] = useState("TH");
-    const [user, setUser] = useState(null); // ✅ state เก็บข้อมูล user
-    const [fadeIn, setFadeIn] = useState(false);
+
 
     const modalContentRef = useRef(null);
-    const navigate = useNavigate();
 
     const handleSubmenuClick = (submenu) => {
         setActiveSubmenu((prev) => (prev === submenu ? null : submenu));
@@ -28,12 +27,6 @@ const Navbar = () => {
         setMenuOpen((prev) => !prev);
     };
 
-    // ✅ ฟังก์ชันนี้จะรับข้อมูลจาก LoginPage เมื่อ login สำเร็จ
-    const handleLogin = (userData) => {
-        setUser(userData); // { email, name }
-        closePopup();
-    };
-
     // ปิด modal ด้วยปุ่ม Esc
     useEffect(() => {
         const onKey = (e) => {
@@ -43,11 +36,22 @@ const Navbar = () => {
         return () => window.removeEventListener("keydown", onKey);
     }, [showPopup]);
 
+    // ถ้าคลิกบริเวณ backdrop จะปิด modal
     const onBackdropClick = (e) => {
+        // ถ้าคลิกตรงนอก content ให้ปิด
         if (modalContentRef.current && !modalContentRef.current.contains(e.target)) {
             setShowPopup(false);
         }
     };
+
+    const collapsedMenuStyle = {
+        flexBasis: "auto",
+        justifyContent: "flex-start",
+    };
+
+    const navigate = useNavigate();
+
+    const [fadeIn, setFadeIn] = useState(false);
 
     const openPopup = () => {
         setShowPopup(true);
@@ -55,7 +59,7 @@ const Navbar = () => {
 
     const closePopup = () => {
         setFadeIn(false);
-        setTimeout(() => setShowPopup(false), 300);
+        setTimeout(() => setShowPopup(false), 300); // รอ animation ก่อนซ่อนจริง
     };
 
     useEffect(() => {
@@ -116,30 +120,6 @@ const Navbar = () => {
                             style={{ width: 250, minWidth: 150 }}
                         />
 
-                        {/* ปุ่มเปลี่ยนภาษา */}
-                        {/* <div style={{ cursor: "pointer", color: "white", fontSize: 16, userSelect: "none", display: "flex", gap: "10px", alignItems: "center" }}>
-                            <span
-                                onClick={() => setLang("TH")}
-                                style={{
-                                    textDecoration: lang === "TH" ? "underline" : "none",
-                                    fontWeight: lang === "TH" ? "bold" : "normal",
-                                }}
-                            >
-                                TH
-                            </span>
-                            <span>|</span>
-                            <span
-                                onClick={() => setLang("EN")}
-                                style={{
-                                    textDecoration: lang === "EN" ? "underline" : "none",
-                                    fontWeight: lang === "EN" ? "bold" : "normal",
-                                }}
-                            >
-                                EN
-                            </span>
-                        </div> */}
-
-
                         {/* ปุ่มเข้าสู่ระบบ */}
                         <a
                             href="/login"
@@ -154,17 +134,6 @@ const Navbar = () => {
                             เข้าสู่ระบบ
                         </a>
 
-                        <div className="ms-auto">
-                            {user ? (
-                                <span style={{ color: "white" }}>คุณ {user.name}</span>
-                            ) : (
-                                <span style={{ color: "white", cursor: "pointer" }} onClick={openPopup}>
-                                    เข้าสู่ระบบ
-                                </span>
-                            )}
-                        </div>
-
-
                         {/* ตะกร้าสินค้า */}
                         <div
                             className="cart-icon position-relative"
@@ -177,7 +146,6 @@ const Navbar = () => {
                         </div>
                     </div>
                 </div>
-
             </nav>
 
             {/*ตรวจสอบสถานะคำสั่งซื้อ*/}
