@@ -12,7 +12,7 @@ app.use(express.json());
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '140244@Fai.',
+  password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'db_web_farmhouse'  // ตั้งเป็นชื่อฐานข้อมูลของคุณ
 });
 
