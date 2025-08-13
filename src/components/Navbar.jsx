@@ -104,7 +104,7 @@ const Navbar = () => {
                         />
 
                         {/* ปุ่มเปลี่ยนภาษา */}
-                        <div style={{ cursor: "pointer", color: "white", fontSize: 16, userSelect: "none", display: "flex", gap: "10px", alignItems: "center" }}>
+                        {/* <div style={{ cursor: "pointer", color: "white", fontSize: 16, userSelect: "none", display: "flex", gap: "10px", alignItems: "center" }}>
                             <span
                                 onClick={() => setLang("TH")}
                                 style={{
@@ -124,7 +124,7 @@ const Navbar = () => {
                             >
                                 EN
                             </span>
-                        </div>
+                        </div> */}
 
 
                         {/* ปุ่มเข้าสู่ระบบ */}
