@@ -40,6 +40,11 @@ const Navbar = () => {
     };
 
 
+    const handleLogout = () => {
+        setUser(null);   // ลบข้อมูลผู้ใช้
+        // ถ้าต้องการ redirect หลัง logout:
+        navigate("/");   // กลับหน้าแรก
+    };
 
     const handleSubmenuClick = (submenu) => {
         setActiveSubmenu((prev) => (prev === submenu ? null : submenu));
