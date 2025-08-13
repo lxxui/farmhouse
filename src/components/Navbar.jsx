@@ -17,25 +17,24 @@ const Navbar = () => {
 
     const modalContentRef = useRef(null);
 
+ // ฟังก์ชันล็อกอิน
     const handleLogin = async (email, password) => {
         try {
-            const res = await fetch("/login", {
+            const res = await fetch("http://localhost:3001/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
             });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                alert(errorData.error);
-                return;
-            }
-
             const data = await res.json();
-            setUser({ name: data.name }); // เก็บชื่อผู้ใช้
-            closePopup(); // ปิด modal หลังล็อกอิน
+            if (data.success) {
+                setUser({ name: data.name });
+                closePopup();
+            } else {
+                alert(data.error || "อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+            }
         } catch (err) {
             console.error(err);
+            alert("เกิดข้อผิดพลาด");
         }
     };
 
@@ -205,106 +204,40 @@ const Navbar = () => {
 
 
             {/* ปุ่มหมวดหมู่สินค้า */}
-            <div className="justify-content-between mt-2">
-                <div className="dropdown">
-                    <button
-                        id="dropdownBtn"
-                        className="btn btn-secondary"
-                        type="button"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                    >
-                        <span>
-                            <i className="bi bi-list"></i>
-                        </span>{" "}
-                        หมวดหมู่สินค้า <i className="bi bi-caret-down-fill ms-1"></i>
-                    </button>
+            <div className={`collapse navbar-collapse ${menuOpen ? "show" : ""}`} style={{ flexBasis: "auto", justifyContent: "flex-start" }}>
+                <div className="d-flex align-items-center w-100 justify-content-end" style={{ gap: 10 }}>
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="ค้นหาสินค้า"
+                        style={{ width: 250, minWidth: 150 }}
+                    />
 
-                    <div className="dropdown-menu mega-menu p-3" style={{ width: "100%" }}>
-                        <div className="col-12">
-                            <div className="d-flex align-items-center mb-3">
-                                <img src="/image/bread.png" alt="หมวดหมู่สินค้า" style={{ height: 40 }} />
-                                <h5 className="ml-2 ms-2 mb-0">หมวดหมู่สินค้า</h5>
-                            </div>
+                    {user ? (
+                        <div className="text-white">
+                            สวัสดี, {user.name}{" "}
+                            <button onClick={handleLogout} className="btn btn-sm btn-outline-light ms-2">
+                                ออกจากระบบ
+                            </button>
                         </div>
+                    ) : (
+                        <span
+                            style={{ color: "white", cursor: "pointer" }}
+                            onClick={openPopup}
+                        >
+                            เข้าสู่ระบบ
+                        </span>
+                    )}
 
-                        <div className="menu-container d-flex flex-column flex-lg-row">
-                            <div className="menu-left d-flex flex-column" style={{ minWidth: 180 }}>
-                                {[
-                                    { id: "promo", label: "Promotion (โปรโมชั่น)" },
-                                    { id: "newproduct", label: "สินค้าใหม่" },
-                                    { id: "bread", label: "ขนมปังแผ่น" },
-                                    { id: "burger", label: "ขนมปังเบอร์เกอร์และขนมปังฮอทดอก" },
-                                    { id: "cake", label: "เค้กขนม" },
-                                    { id: "fried", label: "ผลิตภัณฑ์สำหรับทอด" },
-                                    { id: "catering", label: "ผลิตภัณฑ์ด่วน จัดเลี้ยง" },
-                                ].map(({ id, label }) => (
-                                    <button
-                                        key={id}
-                                        type="button"
-                                        className="btn menu-btn mb-1"
-                                        onClick={() => handleSubmenuClick(id)}
-                                        style={{
-                                            backgroundColor: activeSubmenu === id ? "#198754" : "#6c757d",
-                                            color: "white",
-                                            width: window.innerWidth < 992 ? "100%" : "auto",
-                                        }}
-                                    >
-                                        {label}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div
-                                className="submenu-right flex-grow-1 ps-lg-3 mt-3 mt-lg-0"
-                                style={{ minWidth: 180 }}
-                            >
-                                {activeSubmenu === "promo" && (
-                                    <ul className="submenu list-unstyled">
-                                        {["โปร 1", "โปร 2", "โปร 3", "โปร 4", "โปร 5"].map((item, idx) => (
-                                            <li key={idx}>
-                                                <button
-                                                    type="button"
-                                                    className="btn submenu-btn mb-1"
-                                                    style={{
-                                                        width: window.innerWidth < 992 ? "100%" : "auto",
-                                                    }}
-                                                >
-                                                    {item}
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-
-                                {activeSubmenu === "newproduct" && (
-                                    <ul className="submenu list-unstyled">
-                                        {["สินค้าใหม่ 1", "สินค้าใหม่ 2", "สินค้าใหม่ 3"].map((item, idx) => (
-                                            <li key={idx}>
-                                                <button
-                                                    type="button"
-                                                    className="btn submenu-btn mb-1"
-                                                    style={{
-                                                        width: window.innerWidth < 992 ? "100%" : "auto",
-                                                    }}
-                                                >
-                                                    {item}
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-
-                                {!activeSubmenu && (
-                                    <div style={{ color: "#666", fontStyle: "italic" }}>
-                                        กรุณาเลือกหมวดหมู่ด้านซ้ายเพื่อดูรายละเอียด
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                    <div className="cart-icon position-relative" style={{ fontSize: 24, color: "white", cursor: "pointer" }}>
+                        <i className="fas fa-shopping-cart"></i>
+                        <span className="cart-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            3
+                        </span>
                     </div>
                 </div>
             </div>
+
 
             {/* Modal: แสดง LoginPage component */}
             {
