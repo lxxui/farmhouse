@@ -11,9 +11,35 @@ const Navbar = () => {
     const [menuOpen, setMenuOpen] = useState(false); // toggle hamburger menu
     const [showPopup, setShowPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
     const [lang, setLang] = useState("TH");
+    const [user, setUser] = useState(null);
+
 
 
     const modalContentRef = useRef(null);
+
+    const handleLogin = async (email, password) => {
+        try {
+            const res = await fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                alert(errorData.error);
+                return;
+            }
+
+            const data = await res.json();
+            setUser({ name: data.name }); // เก็บชื่อผู้ใช้
+            closePopup(); // ปิด modal หลังล็อกอิน
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+
 
     const handleSubmenuClick = (submenu) => {
         setActiveSubmenu((prev) => (prev === submenu ? null : submenu));
@@ -72,8 +98,8 @@ const Navbar = () => {
     return (
         <div className="container">
             <nav className="navbar navbar-expand-lg navbar-custom d-flex align-items-center flex-wrap">
-                <div id="clickable-image" className="logo">
-                    <a href="/" className="d-inline-block">
+                <div className="logo">
+                    <a href="/">
                         <img
                             src="/image/logo_top.png"
                             alt="ขนมปัง"
@@ -82,71 +108,76 @@ const Navbar = () => {
                         />
                     </a>
                 </div>
-                {/* Hamburger toggle */}
+
                 <button
                     className="navbar-toggler"
                     type="button"
                     onClick={toggleMenu}
-                    aria-controls="navbarSupportedContent"
-                    aria-expanded={menuOpen}
-                    aria-label="Toggle navigation"
                     style={{ border: "none", background: "transparent", color: "white" }}
                 >
                     <i className="bi bi-list" style={{ fontSize: "1.5rem" }}></i>
                 </button>
 
-
-
                 <div
                     className={`collapse navbar-collapse ${menuOpen ? "show" : ""}`}
-                    id="navbarSupportedContent"
-                    style={collapsedMenuStyle}
+                    style={{ flexBasis: "auto", justifyContent: "flex-start" }}
                 >
-                    {/* ลองเพิ่ม w-100 และเปลี่ยนเป็น justify-content-end */}
-                    <div
-                        className="d-flex align-items-center menu-items-container w-100 justify-content-end"
-                        style={{ gap: 10, flexWrap: "nowrap", flexDirection: "row" }}
-                    >
-                        {/* ช่องค้นหา */}
+                    <div className="d-flex align-items-center w-100 justify-content-end" style={{ gap: 10 }}>
                         <input
                             type="text"
                             className="form-control"
-                            placeholder="ค้นหาสินค้า / Search products"
-                            lang="th"
-                            autoComplete="off"
-                            autoCorrect="off"
-                            autoCapitalize="off"
-                            spellCheck="false"
+                            placeholder="ค้นหาสินค้า"
                             style={{ width: 250, minWidth: 150 }}
                         />
 
-                        {/* ปุ่มเข้าสู่ระบบ */}
-                        <a
-                            href="/login"
-                            className="text-white text-decoration-none"
-                            style={{ fontSize: 16 }}
-                            id="loginBtn"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                openPopup();
-                            }}
-                        >
-                            เข้าสู่ระบบ
-                        </a>
+                        {user ? (
+                            <div className="text-white">
+                                สวัสดี, {user.name}{" "}
+                                <button onClick={handleLogout} className="btn btn-sm btn-outline-light ms-2">
+                                    ออกจากระบบ
+                                </button>
+                            </div>
+                        ) : (
+                            <a
+                                href="/login"
+                                className="text-white text-decoration-none"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    openPopup();
+                                }}
+                            >
+                                เข้าสู่ระบบ
+                            </a>
+                        )}
 
-                        {/* ตะกร้าสินค้า */}
                         <div
                             className="cart-icon position-relative"
                             style={{ fontSize: 24, color: "white", cursor: "pointer" }}
                         >
                             <i className="fas fa-shopping-cart"></i>
-                            <span className="cart-count btn-cart position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <span className="cart-count position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                 3
                             </span>
                         </div>
                     </div>
                 </div>
             </nav>
+
+            {showPopup && (
+                <div
+                    className={`modal fade ${fadeIn ? "fade-in show" : "fade-out"}`}
+                    style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+                    onClick={closePopup}
+                >
+                    <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-body">
+                                <LoginPage />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/*ตรวจสอบสถานะคำสั่งซื้อ*/}
             <button
@@ -271,25 +302,27 @@ const Navbar = () => {
             </div>
 
             {/* Modal: แสดง LoginPage component */}
-            {showPopup && (
-                <div
-                    className={`modal fade ${fadeIn ? "fade-in show" : "fade-out"}`}
-                    style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-                    onClick={closePopup}
-                >
+            {
+                showPopup && (
                     <div
-                        className="modal-dialog"
-                        onClick={(e) => e.stopPropagation()}
+                        className={`modal fade ${fadeIn ? "fade-in show" : "fade-out"}`}
+                        style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+                        onClick={closePopup}
                     >
-                        <div className="modal-content">
-                            <div className="modal-body">
-                                <LoginPage />
+                        <div
+                            className="modal-dialog"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="modal-content">
+                                <div className="modal-body">
+                                    <LoginPage onLogin={handleLogin} />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 
