@@ -68,7 +68,7 @@ function LoginPage({ setUser, onClose }) {
         <div className="form-container">
             <div className="logo text-center">
                 <img src="/image/logo_top.png" alt="Logo" />
-                <div className="text-center font-second">เข้าสู่ระบบ</div>
+                <div className="text-center font-second">เข้าสู่ระบบ1</div>
                 <p className="font-detail">ฟาร์มเฮาส์ ฟาร์มสุข</p>
             </div>
 
