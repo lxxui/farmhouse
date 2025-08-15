@@ -1,4 +1,4 @@
-import React, { useState } from "react";  // ต้อง import useState
+import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/navbar";
@@ -14,12 +14,35 @@ import PieCate from "./components/pieCate";
 import BreadcrumbsCate from "./components/breadcrumbsCate";
 import BurgerCate1 from "./components/burgerCate1";
 import Footer from "./components/footer";
-
 import CheckStatus from "./components/checkStatus";
+import LoginPage from "./components/loginpage"; // import LoginPage
+import ProfilePage from "./components/profile";
 
 function App() {
   // ประกาศ state category
   const [category, setCategory] = useState("");
+  // ประกาศ state user สำหรับ login
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+  const savedUser = localStorage.getItem("user");
+  if (savedUser) {
+    setUser(JSON.parse(savedUser));
+  }
+}, []);
+
+  const handleLogout = () => {
+    setUser(null);
+    // ถ้าอยากให้เด้งไปหน้าแรก
+    window.location.href = "/";
+  };
+
+  const handleLoginSuccess = (userData) => {
+  setUser(userData);
+  localStorage.setItem("user", JSON.stringify(userData));
+};
+
+
 
   return (
     <BrowserRouter>
@@ -32,7 +55,7 @@ function App() {
       >
         {/* Navbar กับเนื้อหาทั้งหมด */}
         <div style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          <Navbar />
+          <Navbar user={user} setUser={setUser}  handleLogout={handleLogout}/>
           <Routes>
             <Route
               path="/"
@@ -55,6 +78,9 @@ function App() {
               }
             />
             <Route path="/checkStatus" element={<CheckStatus />} />
+            <Route path="/login" element={<LoginPage setUser={setUser} />} />
+            <Route path="/profile" element={<ProfilePage user={user} setUser={setUser} handleLogout={handleLogout} />} />
+
           </Routes>
         </div>
 

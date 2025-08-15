@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import CreateAccount from "./createAccount";
+import Swal from "sweetalert2";
 
-function LoginPage() {
+function LoginPage({ setUser, onClose }) {
     const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
 
     // ฟังก์ชันเปิด popup สมัครสมาชิก (ปิด popup login)
@@ -27,24 +28,42 @@ function LoginPage() {
                 body: JSON.stringify({ email, password })
             });
 
-            const text = await response.text(); // แก้เป็น text ก่อน
+            const text = await response.text();
             let data;
-            try { data = JSON.parse(text); } catch { data = text; } // ถ้าไม่ใช่ JSON ก็เก็บ text
+            try { data = JSON.parse(text); } catch { data = text; }
 
             if (response.ok && data.success) {
-                alert(`เข้าสู่ระบบสำเร็จ! ยินดีต้อนรับ ${data.name}`);
+                setUser({ name: data.name, email });
+
+                Swal.fire({
+                    icon: "success",
+                    title: `เข้าสู่ระบบสำเร็จ!`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                if (onClose) onClose();  // <=== ปิด popup login
             } else {
-                alert(data.error || "เข้าสู่ระบบไม่สำเร็จ");
+                Swal.fire({
+                    icon: "error",
+                    title: data.error || "เข้าสู่ระบบไม่สำเร็จ",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
         } catch (error) {
             console.error("Login fetch error:", error);
-            alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+            Swal.fire({
+                icon: "error",
+                title: "เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์",
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
-
     };
 
     return (
-        <div>
+        <div className="form-container">
             <div className="logo text-center">
                 <img src="/image/logo_top.png" alt="Logo" />
                 <div className="text-center font-second">เข้าสู่ระบบ</div>

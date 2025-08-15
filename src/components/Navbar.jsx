@@ -3,13 +3,16 @@ import React, { useState, useEffect, useRef } from "react";
 import LoginPage from "./loginpage"
 import { useNavigate } from "react-router-dom";
 import checkStatus from "./checkStatus"
+import { Link } from "react-router-dom";
+
 
 
 const Navbar = () => {
     const [activeSubmenu, setActiveSubmenu] = useState(null);
     const [langDropdownOpen, setLangDropdownOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false); // toggle hamburger menu
-    const [showPopup, setShowPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
+    const [showPopup, setShowPopup, showLoginPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
+
     const [lang, setLang] = useState("TH");
     const [user, setUser] = useState(null);
 
@@ -32,6 +35,7 @@ const Navbar = () => {
     const toggleMenu = () => {
         setMenuOpen((prev) => !prev);
     };
+
 
     // ปิด modal ด้วยปุ่ม Esc
     useEffect(() => {
@@ -61,11 +65,13 @@ const Navbar = () => {
 
     const openPopup = () => {
         setShowPopup(true);
+        setFadeIn(true);
     };
 
     const closePopup = () => {
         setFadeIn(false);
         setTimeout(() => setShowPopup(false), 300); // รอ animation ก่อนซ่อนจริง
+        setFadeIn(false);
     };
 
     useEffect(() => {
@@ -77,7 +83,7 @@ const Navbar = () => {
 
     return (
         <div className="container">
-            <nav className="navbar navbar-expand-lg navbar-custom d-flex align-items-center flex-wrap">
+            <nav user={user} className="navbar navbar-expand-lg navbar-custom d-flex align-items-center flex-wrap">
                 <div id="clickable-image" className="logo">
                     <a href="/" className="d-inline-block">
                         <img
@@ -121,15 +127,37 @@ const Navbar = () => {
 
                         {/* แสดงชื่อผู้ใช้หรือปุ่มเข้าสู่ระบบ */}
                         {user ? (
-                            <div className="text-white d-flex align-items-center">
-                                สวัสดี, {user.name}
+                            <div className="d-flex align-items-center text-white" style={{ gap: "1rem" }}>
+                                <Link
+                                    to="/profile"
+                                    style={{
+                                        backgroundColor: "#ed1b2f",
+                                        color: "#fff",
+                                        width: "40px",
+                                        height: "40px",
+                                        borderRadius: "50%",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontWeight: "bold",
+                                        fontSize: "14px",
+                                        textTransform: "uppercase",
+                                        textDecoration: "none" // เอาเส้นใต้ลิงก์ออก
+                                    }}
+                                >
+                                    {user.name} {/* แสดงแค่ 2 ตัวแรก */}
+                                </Link>
                                 <button
                                     onClick={handleLogout}
-                                    className="btn btn-sm btn-outline-light ms-2"
+                                    className="btn btn-sm btn-outline-light"
+                                    style={{ borderRadius: "50%", width: "36px", height: "36px", padding: 0 }}
+                                    title="ออกจากระบบ"
                                 >
-                                    ออกจากระบบ
+                                    <i className="fas fa-sign-out-alt"></i>
                                 </button>
                             </div>
+
+
                         ) : (
                             <span
                                 className="text-white"
@@ -147,7 +175,7 @@ const Navbar = () => {
                         >
                             <i className="fas fa-shopping-cart"></i>
                             <span className="cart-count btn-cart position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                3
+                                2
                             </span>
                         </div>
                     </div>
@@ -285,13 +313,13 @@ const Navbar = () => {
                     style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
                     onClick={closePopup}
                 >
-                    <div
-                        className="modal-dialog"
-                        onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-content">
                             <div className="modal-body">
-                                <LoginPage />
+                                <LoginPage
+                                    setUser={setUser}
+                                    onClose={closePopup} // ส่งฟังก์ชันปิด popup ไป
+                                />
                             </div>
                         </div>
                     </div>

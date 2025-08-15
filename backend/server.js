@@ -85,7 +85,7 @@ app.post("/login", async (req, res) => {
     }
 
     // ส่งข้อมูลกลับ ฟรอนต์เอนด์
-    const name = email.slice(0, 2); // ตัวอย่างใช้ 2 ตัวแรกของ email
+    const name = name.slice(0, 2); // ตัวอย่างใช้ 2 ตัวแรกของ email
     res.json({ success: true, name });
   } catch (error) {
     console.error("Login error detail:", error);

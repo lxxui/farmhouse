@@ -57,7 +57,7 @@ body {
   flex-direction: column;
   justify-content: center; /* จัด content กลางแนวตั้ง */
   align-items: center;     /* จัด content กลางแนวนอน */
-  min-height: 500px;       /* กำหนดความสูงเท่ากันทั้งสองฟอร์ม */
+  min-height: 800px;       /* กำหนดความสูงเท่ากันทั้งสองฟอร์ม */
   max-width: 400px;        /* ความกว้างเท่ากับฟอร์ม login */
   margin: 0 auto;
   padding: 20px;
