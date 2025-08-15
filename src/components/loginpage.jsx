@@ -62,6 +62,8 @@ function LoginPage({ setUser, onClose }) {
         }
     };
 
+    
+
     return (
         <div className="form-container">
             <div className="logo text-center">
