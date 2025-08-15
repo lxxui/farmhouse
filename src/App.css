@@ -52,3 +52,13 @@ body {
   transform: translateY(-20px);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+.form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* จัด content กลางแนวตั้ง */
+  align-items: center;     /* จัด content กลางแนวนอน */
+  min-height: 500px;       /* กำหนดความสูงเท่ากันทั้งสองฟอร์ม */
+  max-width: 400px;        /* ความกว้างเท่ากับฟอร์ม login */
+  margin: 0 auto;
+  padding: 20px;
+}

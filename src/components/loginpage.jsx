@@ -44,9 +44,7 @@ function LoginPage() {
     };
 
     return (
-        <div
-          
-        >
+        <div>
             <div className="logo text-center">
                 <img src="/image/logo_top.png" alt="Logo" />
                 <div className="text-center font-second">เข้าสู่ระบบ</div>

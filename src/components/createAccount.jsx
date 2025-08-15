@@ -56,9 +56,7 @@ function CreateAccount({ onClose }) {
     };
     return (
         <>
-            <div
-               
-            >
+            <div>
                 <div className="logo text-center">
                     <img src="/image/logo_top.png" alt="Logo" />
                     <div className="text-center font-second">สมัครสมาชิก</div>
