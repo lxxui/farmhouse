@@ -35,8 +35,8 @@ const Carousel = () => {
           data-bs-target="#carouselExample"
           data-bs-slide="prev"
         >
-          <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span className="visually-hidden">Previous</span>
+          {/* <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span className="visually-hidden">Previous</span> */}
         </button>
         <button
           className="carousel-control-next"
@@ -44,8 +44,8 @@ const Carousel = () => {
           data-bs-target="#carouselExample"
           data-bs-slide="next"
         >
-          <span className="carousel-control-next-icon" aria-hidden="true"></span>
-          <span className="visually-hidden">Next</span>
+          {/* <span className="carousel-control-next-icon" aria-hidden="true"></span>
+          <span className="visually-hidden">Next</span> */}
         </button>
       </div>
     </div>

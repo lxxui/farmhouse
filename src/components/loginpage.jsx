@@ -44,7 +44,10 @@ function LoginPage() {
     };
 
     return (
-        <div>
+        <div
+            className="modal-dialog d-flex align-items-center"
+            style={{ minHeight: "100vh" }}
+        >
             <div className="logo text-center">
                 <img src="/image/logo_top.png" alt="Logo" />
                 <div className="text-center font-second">เข้าสู่ระบบ</div>
