@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import CreateAccount from "./createAccount";
 import Swal from "sweetalert2";
 
-function LoginPage({ setUser, onClose }) {
+function LoginPage({ setUser,onClose })  {
     const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
 
     // ฟังก์ชันเปิด popup สมัครสมาชิก (ปิด popup login)
@@ -16,7 +16,7 @@ function LoginPage({ setUser, onClose }) {
     };
 
 
-    const handleLogin = async (e) => {
+const handleLogin = async (e) => {
         e.preventDefault();
         const email = e.target.email.value;
         const password = e.target.password.value;
@@ -62,13 +62,11 @@ function LoginPage({ setUser, onClose }) {
         }
     };
 
-    
-
     return (
         <div className="form-container">
             <div className="logo text-center">
                 <img src="/image/logo_top.png" alt="Logo" />
-                <div className="text-center font-second">เข้าสู่ระบบ1</div>
+                <div className="text-center font-second">เข้าสู่ระบบ</div>
                 <p className="font-detail">ฟาร์มเฮาส์ ฟาร์มสุข</p>
             </div>
 
