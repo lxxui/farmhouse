@@ -45,8 +45,7 @@ function LoginPage() {
 
     return (
         <div
-            className="modal-dialog d-flex align-items-center"
-            style={{ minHeight: "100vh" }}
+          
         >
             <div className="logo text-center">
                 <img src="/image/logo_top.png" alt="Logo" />
