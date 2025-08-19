@@ -157,8 +157,9 @@ const Navbar = () => {
                                         textDecoration: "none" // เอาเส้นใต้ลิงก์ออก
                                     }}
                                 >
-                                    {user.name} {/* แสดงแค่ 2 ตัวแรก */}
+                                    {user.email.slice(0, 2).toUpperCase()} {/* เอา 2 ตัวแรกของ email */}
                                 </Link>
+
                                 <button
                                     onClick={handleLogout}
                                     className="btn btn-sm btn-outline-light"

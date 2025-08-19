@@ -73,17 +73,18 @@ app.post('/login', async (req, res) => {
     }
 
     const user = rows[0];
+    console.log("Login user:", user); // ✅ ตอนนี้ user มีค่าแล้ว
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
       return res.status(401).json({ error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
     }
 
     // ส่งค่า user กลับ
-    const displayName = email; // ใช้ email เป็นชั่วคราวแทนชื่อ
 
     res.json({
       success: true,
-      name: displayName,
+      id: user.id,
+      username: user.username,
       email: user.email,
       phone: user.phone,
     });
@@ -97,30 +98,91 @@ app.post('/login', async (req, res) => {
 });
 
 // อัพเดตชื่อและเบอร์โทรใน address table
-app.put('/address/:userId', async (req, res) => {
+// อัปเดตข้อมูล user
+app.put("/user/:id", async (req, res) => {
+  const { id } = req.params;
+  const { username, email, phone } = req.body;
+
+  console.log("PUT /user/:id hit", id, req.body);
+
   try {
-    const { userId } = req.params;
-    const { contact_name, phone } = req.body;
-
-    if (!contact_name || !phone) {
-      return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วน' });
-    }
-
-    const [result] = await pool.query(
-      'UPDATE address SET contact_name = ?, phone = ? WHERE user_id = ?',
-      [contact_name, phone, userId]
+    await pool.query(
+      "UPDATE user SET username = ?, email = ?, phone = ? WHERE id = ?",
+      [username, email, phone, id]
     );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'ไม่พบ address ของผู้ใช้' });
-    }
-
-    res.json({ success: true, message: 'อัพเดตข้อมูลสำเร็จ' });
-  } catch (error) {
-    console.error('Address update error:', error);
-    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัพเดตข้อมูล' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
+
+
+// ดึงข้อมูล address ของ user
+app.get("/user/:id/address", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.query("SELECT * FROM address WHERE user_id = ?", [id]);
+    if (rows.length === 0) {
+      return res.json({ success: true, address: {} });
+    }
+    res.json({ success: true, address: rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ดึงข้อมูล user ตาม id
+app.get("/user/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await pool.query(
+      "SELECT id, username, email, phone FROM user WHERE id = ?",
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, error: "ไม่พบผู้ใช้" });
+    }
+
+    res.json({ success: true, user: rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+// อัปเดต/เพิ่มข้อมูล address
+app.put("/user/:id/address", async (req, res) => {
+  const { id } = req.params;
+  const { contact_name, house_number, village, street, sub_district, district, province, postal_code, phone } = req.body;
+
+  console.log("PUT /user/:id/address hit", id, req.body);
+
+  try {
+    await pool.query(
+      `INSERT INTO address 
+        (user_id, contact_name, house_number, village, street, sub_district, district, province, postal_code, phone) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE 
+         contact_name=?, house_number=?, village=?, street=?, sub_district=?, district=?, province=?, postal_code=?, phone=?`,
+      [
+        id, contact_name, house_number, village, street, sub_district, district, province, postal_code, phone,
+        contact_name, house_number, village, street, sub_district, district, province, postal_code, phone
+      ]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
