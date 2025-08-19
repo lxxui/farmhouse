@@ -37,10 +37,10 @@ function App() {
     window.location.href = "/";
   };
 
-  const handleLoginSuccess = (userData) => {
-  setUser(userData);
-  localStorage.setItem("user", JSON.stringify(userData));
-};
+//   const handleLoginSuccess = (userData) => {
+//   setUser(userData);
+//   localStorage.setItem("user", JSON.stringify(userData));
+// };
 
 
 

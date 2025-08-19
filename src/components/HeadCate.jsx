@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 
 const MenuList = ({ category, setCategory }) => {
   const [loading, setLoading] = useState(false);

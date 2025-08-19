@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import CreateAccount from "./createAccount";
 import Swal from "sweetalert2";
 
-function LoginPage({ setUser,onClose })  {
+function LoginPage({ setUser, onClose }) {
     const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
 
     // ฟังก์ชันเปิด popup สมัครสมาชิก (ปิด popup login)
@@ -16,7 +16,7 @@ function LoginPage({ setUser,onClose })  {
     };
 
 
-const handleLogin = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         const email = e.target.email.value;
         const password = e.target.password.value;
@@ -33,7 +33,9 @@ const handleLogin = async (e) => {
             try { data = JSON.parse(text); } catch { data = text; }
 
             if (response.ok && data.success) {
-                setUser({ name: data.name, email });
+                const userData = { name: data.name, email }; // ข้อมูล user
+                setUser(userData);  // set state
+                localStorage.setItem("user", JSON.stringify(userData)); // <-- เพิ่มตรงนี้
 
                 Swal.fire({
                     icon: "success",
@@ -42,7 +44,7 @@ const handleLogin = async (e) => {
                     showConfirmButton: false
                 });
 
-                if (onClose) onClose();  // <=== ปิด popup login
+                if (onClose) onClose();  // ปิด popup login
             } else {
                 Swal.fire({
                     icon: "error",

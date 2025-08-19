@@ -1,36 +1,38 @@
 // src/components/navbar.jsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import LoginPage from "./loginpage"
 import { useNavigate } from "react-router-dom";
-import checkStatus from "./checkStatus"
+// import checkStatus from "./checkStatus"
 import { Link } from "react-router-dom";
 
 
 
 const Navbar = () => {
     const [activeSubmenu, setActiveSubmenu] = useState(null);
-    const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+    // const [setLangDropdownOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false); // toggle hamburger menu
-    const [showPopup, setShowPopup, showLoginPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
+    const [showPopup, setShowPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
 
-    const [lang, setLang] = useState("TH");
+    // const [lang, setLang] = useState("TH");
     const [user, setUser] = useState(null);
 
-    const modalContentRef = useRef(null);
+
+    // const modalContentRef = useRef(null);
 
     // ฟังก์ชัน logout
     const handleLogout = () => {
-        setUser(null);        // ล้างข้อมูล user
-        navigate("/");        // กลับหน้าแรก
+        setUser(null);                     // ล้าง state user
+        localStorage.removeItem("user");   // ลบ user จาก localStorage
+        navigate("/");                     // กลับหน้าแรก
     };
 
     const handleSubmenuClick = (submenu) => {
         setActiveSubmenu((prev) => (prev === submenu ? null : submenu));
     };
 
-    const toggleLangDropdown = () => {
-        setLangDropdownOpen((prev) => !prev);
-    };
+    // const toggleLangDropdown = () => {
+    //     setLangDropdownOpen((prev) => !prev);
+    // };
 
     const toggleMenu = () => {
         setMenuOpen((prev) => !prev);
@@ -44,15 +46,25 @@ const Navbar = () => {
         };
         if (showPopup) window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
+
+
     }, [showPopup]);
 
-    // ถ้าคลิกบริเวณ backdrop จะปิด modal
-    const onBackdropClick = (e) => {
-        // ถ้าคลิกตรงนอก content ให้ปิด
-        if (modalContentRef.current && !modalContentRef.current.contains(e.target)) {
-            setShowPopup(false);
+    useEffect(() => {
+        // โหลด user จาก localStorage ตอนแรกหน้าโหลด
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (storedUser) {
+            setUser(storedUser);
         }
-    };
+    }, []);
+
+    // ถ้าคลิกบริเวณ backdrop จะปิด modal
+    // const onBackdropClick = (e) => {
+    //     // ถ้าคลิกตรงนอก content ให้ปิด
+    //     if (modalContentRef.current && !modalContentRef.current.contains(e.target)) {
+    //         setShowPopup(false);
+    //     }
+    // };
 
     const collapsedMenuStyle = {
         flexBasis: "auto",

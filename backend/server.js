@@ -8,12 +8,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// สร้างการเชื่อมต่อ MySQL
+// สร้าง connection pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'db_web_farmhouse'  // ตั้งเป็นชื่อฐานข้อมูลของคุณ
+  database: process.env.DB_NAME || 'db_web_farmhouse',
 });
 
 // API ตัวอย่าง
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 // ดึงข้อมูล user ทั้งหมด
 app.get('/users', async (req, res) => {
   try {
-    const [rows] = await pool.query('select * from user'); // ชื่อตาราง user ตามที่คุณสร้าง
+    const [rows] = await pool.query('SELECT * FROM user');
     res.json(rows);
   } catch (error) {
     console.error(error);
@@ -40,16 +40,13 @@ app.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วน' });
     }
 
-    // ตรวจสอบว่ามีอีเมลนี้ในระบบแล้วหรือยัง
     const [existing] = await pool.query('SELECT id FROM user WHERE email = ?', [email]);
     if (existing.length > 0) {
       return res.status(409).json({ error: 'อีเมลนี้ถูกใช้งานแล้ว' });
     }
 
-    // เข้ารหัสรหัสผ่าน
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // บันทึกข้อมูลผู้ใช้ใหม่
     await pool.query(
       'INSERT INTO user (email, phone, password_hash) VALUES (?, ?, ?)',
       [email, phone, hashedPassword]
@@ -62,41 +59,68 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// login API
-app.post("/login", async (req, res) => {
+// Login API
+app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+      return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วน' });
     }
 
-    // ดึงผู้ใช้จากฐานข้อมูล
-    const [rows] = await pool.query("SELECT * FROM user WHERE email = ?", [email]);
+    const [rows] = await pool.query('SELECT * FROM user WHERE email = ?', [email]);
     if (rows.length === 0) {
-      return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+      return res.status(401).json({ error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
     }
 
     const user = rows[0];
-
-    // ตรวจสอบรหัสผ่าน
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
-      return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+      return res.status(401).json({ error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
     }
 
-    // ส่งข้อมูลกลับ ฟรอนต์เอนด์
-    const name = name.slice(0, 2); // ตัวอย่างใช้ 2 ตัวแรกของ email
-    res.json({ success: true, name });
+    // ส่งค่า user กลับ
+    const displayName = email; // ใช้ email เป็นชั่วคราวแทนชื่อ
+
+    res.json({
+      success: true,
+      name: displayName,
+      email: user.email,
+      phone: user.phone,
+    });
   } catch (error) {
-    console.error("Login error detail:", error);
+    console.error('Login error detail:', error);
     res.status(500).json({
-      error: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ",
-      detail: error.message
+      error: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
+      detail: error.message,
     });
   }
-
 });
 
+// อัพเดตชื่อและเบอร์โทรใน address table
+app.put('/address/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { contact_name, phone } = req.body;
+
+    if (!contact_name || !phone) {
+      return res.status(400).json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วน' });
+    }
+
+    const [result] = await pool.query(
+      'UPDATE address SET contact_name = ?, phone = ? WHERE user_id = ?',
+      [contact_name, phone, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'ไม่พบ address ของผู้ใช้' });
+    }
+
+    res.json({ success: true, message: 'อัพเดตข้อมูลสำเร็จ' });
+  } catch (error) {
+    console.error('Address update error:', error);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัพเดตข้อมูล' });
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
