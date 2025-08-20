@@ -3,7 +3,7 @@ import provinces from '../data/provinces.json';
 import districts from '../data/districts.json';
 import subdistricts from '../data/subdistricts.json';
 import OrderStatus from '../components/checkStatus';
-import AddProduct from './component/addProduct'; // path ต้องตรงกับที่เก็บไฟล์จริง
+import AddProduct from '../components/addProduct'
 
 import Swal from "sweetalert2";
 
@@ -31,12 +31,12 @@ function ProfilePage({ user, setUser }) {
 
     // อัปเดต formData เมื่อ user ถูกโหลด
     useEffect(() => {
-        if (user) {
+        if (!user) {
             setFormData({
-                username: user.username || "",
-                email: user.email || "",
-                phone: user.phone || "",
-                contact_name: user.username || "",
+                username: "",
+                email: "",
+                phone: "",
+                contact_name: "",
                 house_number: "",
                 village: "",
                 street: "",
@@ -45,7 +45,22 @@ function ProfilePage({ user, setUser }) {
                 sub_district: "",
                 postal_code: "",
             });
+            return;
         }
+
+        setFormData({
+            username: user.username || "",
+            email: user.email || "",
+            phone: user.phone || "",
+            contact_name: user.username || "",
+            house_number: "",
+            village: "",
+            street: "",
+            province: "",
+            district: "",
+            sub_district: "",
+            postal_code: "",
+        });
 
         const fetchAddress = async () => {
             if (!user?.id) return;
@@ -66,7 +81,6 @@ function ProfilePage({ user, setUser }) {
                         phone: data.address.phone || "",
                     }));
 
-                    // ตั้ง selectedProvinceCode / selectedDistrictCode ให้ filter dropdown ทำงาน
                     const province = provinces.find(p => p.provinceNameTh === data.address.province);
                     setSelectedProvinceCode(province?.provinceCode || "");
 
@@ -84,15 +98,16 @@ function ProfilePage({ user, setUser }) {
 
     }, [user]);
 
+
     const menuItems = [
         { key: "profile", label: "ข้อมูลส่วนตัว", icon: "fas fa-user" },
         { key: "address", label: "ข้อมูลที่อยู่", icon: "fas fa-map-marker-alt" },
         { key: "orders", label: "ติดตามการสั่งซื้อ", icon: "fas fa-box" },
-        // เพิ่มเฉพาะ admin
-        ...(user.role === "admin"
+        ...(user?.role === "admin"
             ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }]
             : []),
     ];
+
 
 
     const handleMenuClick = (key) => {
@@ -134,7 +149,8 @@ function ProfilePage({ user, setUser }) {
                 body: JSON.stringify({
                     username: formData.username,
                     email: formData.email,
-                    phone: formData.phone
+                    phone: formData.phone,
+                    role: formData.role
                 })
             });
 
@@ -247,7 +263,9 @@ function ProfilePage({ user, setUser }) {
                         ...prev,
                         username: data.user.username || "",
                         email: data.user.email || "",
-                        phone: data.user.phone || ""
+                        phone: data.user.phone || "",
+                        role: data.user.role // ✅ เพิ่มตรงนี้
+
                     }));
                 }
             } catch (err) {
@@ -256,7 +274,8 @@ function ProfilePage({ user, setUser }) {
         };
 
         fetchUser();
-    }, [user?.id]);
+    }, [user?.id, setUser, setFormData]);
+
 
 
 
@@ -423,9 +442,15 @@ function ProfilePage({ user, setUser }) {
                 );
 
             case "addProduct":
-                if (user.role == "admin") {
+                if (!user) return <p>กำลังโหลดข้อมูลผู้ใช้...</p>; // user ยังไม่โหลด
+                if (user.role === "admin") {
                     return <AddProduct userId={user.id} />;
+                } else if (user.role) {
+                    return <p>คุณไม่มีสิทธิ์เข้าถึงหน้านี้</p>; // user โหลดแล้ว แต่ไม่ใช่ admin
+                } else {
+                    return <p>กำลังโหลดข้อมูล role...</p>; // role ยัง undefined
                 }
+
             default:
                 return null;
         }
@@ -438,15 +463,21 @@ function ProfilePage({ user, setUser }) {
                     {/* Sidebar */}
                     <div className="col-md-3 col-sm-12 mb-3">
                         <div className="list-group">
-                            {menuItems.map(item => (
-                                <button
-                                    key={item.key}
-                                    className={`list-group-item list-group-item-action ${activeMenu === item.key ? "active" : ""}`}
-                                    onClick={() => handleMenuClick(item.key)}
-                                >
-                                    <i className={`${item.icon} me-2`}></i> {item.label}
-                                </button>
-                            ))}
+                            {menuItems.map(item => {
+                                // ถ้าเป็นเมนู addProduct แต่ user ไม่ใช่ admin ให้ข้าม
+                                if (item.key === "addProduct" && user?.role !== "admin") return null;
+
+                                return (
+                                    <button
+                                        key={item.key}
+                                        className={`list-group-item list-group-item-action ${activeMenu === item.key ? "active" : ""}`}
+                                        onClick={() => handleMenuClick(item.key)}
+                                    >
+                                        <i className={`${item.icon} me-2`}></i> {item.label}
+                                    </button>
+                                );
+                            })}
+
                         </div>
                     </div>
 

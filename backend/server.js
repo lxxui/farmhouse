@@ -73,20 +73,19 @@ app.post('/login', async (req, res) => {
     }
 
     const user = rows[0];
-    console.log("Login user:", user); // ✅ ตอนนี้ user มีค่าแล้ว
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) {
       return res.status(401).json({ error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' });
     }
 
-    // ส่งค่า user กลับ
-
+    // ส่งค่า user กลับพร้อม role
     res.json({
       success: true,
       id: user.id,
       username: user.username,
       email: user.email,
       phone: user.phone,
+      role: user.role, // ✅ เพิ่ม role
     });
   } catch (error) {
     console.error('Login error detail:', error);
@@ -96,6 +95,7 @@ app.post('/login', async (req, res) => {
     });
   }
 });
+
 
 // อัพเดตชื่อและเบอร์โทรใน address table
 // อัปเดตข้อมูล user
@@ -138,7 +138,7 @@ app.get("/user/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const [rows] = await pool.query(
-      "SELECT id, username, email, phone FROM user WHERE id = ?",
+      "SELECT id, username, email, phone,role FROM user WHERE id = ?",
       [id]
     );
 

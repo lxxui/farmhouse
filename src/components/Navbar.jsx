@@ -4,28 +4,44 @@ import LoginPage from "./loginpage"
 import { useNavigate } from "react-router-dom";
 // import checkStatus from "./checkStatus"
 import { Link } from "react-router-dom";
+import Swal from "sweetalert2";
 
 
 
-const Navbar = () => {
+const Navbar = ({ user, setUser, setFormData }) => {
     const [activeSubmenu, setActiveSubmenu] = useState(null);
     // const [setLangDropdownOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false); // toggle hamburger menu
     const [showPopup, setShowPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
 
-    // const [lang, setLang] = useState("TH");
-    const [user, setUser] = useState(null);
-
-
     // const modalContentRef = useRef(null);
 
     // ฟังก์ชัน logout
     const handleLogout = () => {
-        setUser(null);                     // ล้าง state user
-        localStorage.removeItem("user");   // ลบ user จาก localStorage
-        navigate("/");                     // กลับหน้าแรก
-    };
+        Swal.fire({
+            title: "คุณแน่ใจหรือไม่?",
+            text: "คุณต้องการออกจากระบบใช่หรือไม่",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ใช่, ออกจากระบบ",
+            cancelButtonText: "ยกเลิก"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setUser(null);                     // ล้าง state user
+                localStorage.removeItem("user");   // ลบ user จาก localStorage
+                navigate("/");                     // กลับหน้าแรก
 
+                Swal.fire({
+                    title: "ออกจากระบบสำเร็จ",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    };
     const handleSubmenuClick = (submenu) => {
         setActiveSubmenu((prev) => (prev === submenu ? null : submenu));
     };
@@ -46,8 +62,6 @@ const Navbar = () => {
         };
         if (showPopup) window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
-
-
     }, [showPopup]);
 
     useEffect(() => {
@@ -56,7 +70,14 @@ const Navbar = () => {
         if (storedUser) {
             setUser(storedUser);
         }
-    }, []);
+    }, [setUser]); // ✅ แก้ warning
+
+    useEffect(() => {
+        if (showPopup) {
+            setTimeout(() => setFadeIn(true), 10);
+        }
+    }, [showPopup]);
+
 
     // ถ้าคลิกบริเวณ backdrop จะปิด modal
     // const onBackdropClick = (e) => {
@@ -86,16 +107,11 @@ const Navbar = () => {
         setFadeIn(false);
     };
 
-    useEffect(() => {
-        if (showPopup) {
-            setTimeout(() => setFadeIn(true), 10);
-        }
-    }, [showPopup]);
 
 
     return (
         <div className="container">
-            <nav user={user} className="navbar navbar-expand-lg navbar-custom d-flex align-items-center flex-wrap">
+            <nav user={user} setUser={setUser} setFormData={setFormData} className="navbar navbar-expand-lg navbar-custom d-flex align-items-center flex-wrap">
                 <div id="clickable-image" className="logo">
                     <a href="/" className="d-inline-block">
                         <img
