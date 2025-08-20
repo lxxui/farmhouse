@@ -3,6 +3,8 @@ import provinces from '../data/provinces.json';
 import districts from '../data/districts.json';
 import subdistricts from '../data/subdistricts.json';
 import OrderStatus from '../components/checkStatus';
+import AddProduct from './component/addProduct'; // path ต้องตรงกับที่เก็บไฟล์จริง
+
 import Swal from "sweetalert2";
 
 function ProfilePage({ user, setUser }) {
@@ -86,7 +88,12 @@ function ProfilePage({ user, setUser }) {
         { key: "profile", label: "ข้อมูลส่วนตัว", icon: "fas fa-user" },
         { key: "address", label: "ข้อมูลที่อยู่", icon: "fas fa-map-marker-alt" },
         { key: "orders", label: "ติดตามการสั่งซื้อ", icon: "fas fa-box" },
+        // เพิ่มเฉพาะ admin
+        ...(user.role === "admin"
+            ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }]
+            : []),
     ];
+
 
     const handleMenuClick = (key) => {
         setActiveMenu(key);
@@ -410,11 +417,15 @@ function ProfilePage({ user, setUser }) {
             case "orders":
                 return (
                     <div>
-                       {/* หน้าเช็คสถานะ*/}
-                         <OrderStatus userId={user.id} />
+                        {/* หน้าเช็คสถานะ*/}
+                        <OrderStatus userId={user.id} />
                     </div>
                 );
 
+            case "addProduct":
+                if (user.role == "admin") {
+                    return <AddProduct userId={user.id} />;
+                }
             default:
                 return null;
         }

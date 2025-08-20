@@ -17,6 +17,7 @@ import Footer from "./components/footer";
 import CheckStatus from "./components/checkStatus";
 import LoginPage from "./components/loginpage"; // import LoginPage
 import ProfilePage from "./components/profile";
+import AddProduct from "./components/addProduct";
 
 function App() {
   // ประกาศ state category
@@ -80,6 +81,7 @@ function App() {
             <Route path="/checkStatus" element={<CheckStatus />} />
             <Route path="/login" element={<LoginPage setUser={setUser} />} />
             <Route path="/profile" element={<ProfilePage user={user} setUser={setUser} handleLogout={handleLogout} />} />
+            <Route path="/addproduct" element={<AddProduct setUser={setUser} />} />
 
           </Routes>
         </div>
