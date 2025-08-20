@@ -3,7 +3,7 @@ import provinces from '../data/provinces.json';
 import districts from '../data/districts.json';
 import subdistricts from '../data/subdistricts.json';
 import OrderStatus from '../components/checkStatus';
-import AddProduct from '../components/addProduct'
+import AddProduct from "./addProduct";
 
 import Swal from "sweetalert2";
 
@@ -103,9 +103,10 @@ function ProfilePage({ user, setUser }) {
         { key: "profile", label: "ข้อมูลส่วนตัว", icon: "fas fa-user" },
         { key: "address", label: "ข้อมูลที่อยู่", icon: "fas fa-map-marker-alt" },
         { key: "orders", label: "ติดตามการสั่งซื้อ", icon: "fas fa-box" },
-        ...(user?.role === "admin"
-            ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }]
-            : []),
+        { key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }
+        // ...(user?.role === "admin"
+        //     ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }]
+        //     : []),
     ];
 
 
@@ -442,14 +443,13 @@ function ProfilePage({ user, setUser }) {
                 );
 
             case "addProduct":
-                if (!user) return <p>กำลังโหลดข้อมูลผู้ใช้...</p>; // user ยังไม่โหลด
-                if (user.role === "admin") {
-                    return <AddProduct userId={user.id} />;
-                } else if (user.role) {
-                    return <p>คุณไม่มีสิทธิ์เข้าถึงหน้านี้</p>; // user โหลดแล้ว แต่ไม่ใช่ admin
-                } else {
-                    return <p>กำลังโหลดข้อมูล role...</p>; // role ยัง undefined
-                }
+                return (
+                    <div>
+                        {/* หน้าเช็คสถานะ*/}
+                        <AddProduct userId={user.id} />
+                    </div>
+                );
+
 
             default:
                 return null;
