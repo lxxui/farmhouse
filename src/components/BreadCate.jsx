@@ -1,43 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const BreadMenu = () => {
-  const items = [
-    {
-      id: 1,
-      img: "/image/1.png",
-      title: "อิงลิชเบรด",
-      price: 295,
-      weight: "280 กรัม | 7 แผ่น",
-    },
-    {
-      id: 2,
-      img: "/image/3.png",
-      title: "ขนมปังลูกเกด",
-      price: 295,
-      weight: "250 กรัม",
-    },
-    {
-      id: 3,
-      img: "/image/4.png",
-      title: "ขนมปังไร้ขอบ",
-      price: 295,
-      weight: "220 กรัม",
-    },
-    {
-      id: 4,
-      img: "/image/5.png",
-      title: "ขนมปังรสนมฮอกไกโด",
-      price: 295,
-      weight: "240 กรัม",
-    },
-    {
-      id: 5,
-      img: "/image/2.png",
-      title: "ขนมปังทาหน้า มอคค่า",
-      price: 295,
-      weight: "- กรัม",
-    },
-  ];
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        // ส่ง category เป็นชื่อหมวดหมู่ใน DB (ตรงกับ CategoryName)
+        const res = await fetch("http://localhost:3001/products?category=ขนมปังแผ่น");
+        const data = await res.json();
+
+        if (data.success && data.products) {
+          setItems(data.products);
+        } else {
+          console.error("ไม่พบสินค้าหมวดนี้", data.error);
+        }
+      } catch (err) {
+        console.error("Fetch products error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) return <p>กำลังโหลดสินค้าขนมปัง...</p>;
 
   return (
     <div data-id="1" className="container mt-3 mb-5">
@@ -57,8 +46,8 @@ const BreadMenu = () => {
         ขนมปังสดใหม่ หอม นุ่ม เหมาะสำหรับทำแซนด์วิชและของว่างทุกโอกาส
       </p>
       <div className="row g-3">
-        {items.map(({ id, img, title, price, weight }) => (
-          <div key={id} className="col-md-3 mb-4">
+        {items.map(({ ProductID, ProductName, Price, ShortDescription, ImageURL }) => (
+          <div key={ProductID} className="col-md-3 mb-4">
             <div
               className="card h-100 text-center"
               style={{
@@ -75,8 +64,8 @@ const BreadMenu = () => {
                 }}
               >
                 <img
-                  src={img}
-                  alt={title}
+                  src={ImageURL}
+                  alt={ProductName}
                   style={{ width: "100%", height: "100%", objectFit: "contain" }}
                 />
               </div>
@@ -85,7 +74,7 @@ const BreadMenu = () => {
                   className="card-title"
                   style={{ fontWeight: 600, fontSize: "1rem" }}
                 >
-                  {title}
+                  {ProductName}
                 </h5>
                 <p
                   className="card-price"
@@ -95,13 +84,13 @@ const BreadMenu = () => {
                     marginBottom: "0.3rem",
                   }}
                 >
-                  {price} ฿
+                  {Price} ฿
                 </p>
                 <p
                   className="card-text"
                   style={{ color: "#555", fontSize: "0.9rem", marginBottom: 16 }}
                 >
-                  <i className="fas fa-weight-hanging me-1"></i> {weight}
+                  <i className="fas fa-weight-hanging me-1"></i> {ShortDescription}
                 </p>
                 <button
                   className="btn btn-danger"
@@ -115,7 +104,6 @@ const BreadMenu = () => {
         ))}
       </div>
     </div>
-
   );
 };
 

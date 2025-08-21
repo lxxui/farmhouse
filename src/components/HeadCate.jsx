@@ -1,22 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const MenuList = ({ category, setCategory }) => {
+const MenuList = ({ setCategory }) => {
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(""); // แยก state สำหรับ select
+
+  useEffect(() => {
+    fetch("http://localhost:3001/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.categories)) {
+          setCategories(data.categories);
+        } else {
+          console.error("categories ไม่ใช่ array:", data);
+          setCategories([]);
+        }
+      })
+      .catch((err) => console.error("โหลด categories error:", err));
+  }, []);
 
   const handleCategoryChange = (e) => {
-    setLoading(true);        // เริ่มแสดง loading
-    setCategory(e.target.value);
+    const value = e.target.value;
+    setSelectedCategory(value); // update select
+    setCategory(value); // ส่งค่าไป parent
+    setLoading(true);
 
-    // สมมติว่ากรองข้อมูลใช้เวลา 1 วินาที (simulate loading)
     setTimeout(() => {
-      setLoading(false);     // ซ่อน loading เมื่อเสร็จ
-    }, 4000);
+      setLoading(false);
+    }, 1000); // simulate loading
   };
 
   return (
     <>
       <div className="container mt-2">
-        {/* Dropdown */}
         <div className="row">
           <div className="col-md-8">
             <h4>รายการเมนู</h4>
@@ -24,28 +40,22 @@ const MenuList = ({ category, setCategory }) => {
           <div className="col-md-4">
             <div className="filter-dropdown d-flex justify-content-end mb-3">
               <select
-                id="categoryFilter"
-                className="form-select form-control"
-                style={{ width: 200 }}
-                value={category}
+                value={selectedCategory}
                 onChange={handleCategoryChange}
-                disabled={loading}  // ถ้าโหลดอยู่ก็ disable dropdown เพื่อกันคลิกซ้ำ
+                className="form-select m-1 p-1"
               >
                 <option value="">ทุกหมวด</option>
-                <option value="1">🍞 ขนมปังแผ่น</option>
-                <option value="2">🌭 ฮอทดอก</option>
-                <option value="3">🍔 เบอร์เกอร์</option>
-                <option value="4">🥪 ขนมปังสอดไส้</option>
-                <option value="5">🎂 เค้กและขนมญี่ปุ่น</option>
-                <option value="6">🥧 พาย</option>
-                <option value="7">🍞 เกล็ดขนมปัง</option>
+                {categories.map((cat) => (
+                  <option key={cat.CategoryID} value={cat.CategoryID}>
+                    {cat.Icon} {cat.CategoryName}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Loading spinner */}
       {loading && (
         <div
           id="loading-spinner"

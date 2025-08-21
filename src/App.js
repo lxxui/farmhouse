@@ -64,7 +64,7 @@ function App() {
                 <>
                   <Promotion />
                   <TipsSection />
-                  <MenuList category={category} setCategory={setCategory} />
+                  <MenuList setCategory={setCategory} />
 
                   {/* แสดง component เมนูที่กรองตาม category */}
                   {(category === "" || category === "1") && <BreadMenu category={category} />}

@@ -103,10 +103,10 @@ function ProfilePage({ user, setUser }) {
         { key: "profile", label: "ข้อมูลส่วนตัว", icon: "fas fa-user" },
         { key: "address", label: "ข้อมูลที่อยู่", icon: "fas fa-map-marker-alt" },
         { key: "orders", label: "ติดตามการสั่งซื้อ", icon: "fas fa-box" },
-        { key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }
-        // ...(user?.role === "admin"
-        //     ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }]
-        //     : []),
+        // { key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }
+        ...(user?.role === "admin"
+            ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }]
+            : []),
     ];
 
 

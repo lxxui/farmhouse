@@ -182,6 +182,56 @@ app.put("/user/:id/address", async (req, res) => {
 });
 
 
+// ดึง category ทั้งหมด
+app.get('/categories', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT CategoryID, CategoryName, Icon FROM Categories ORDER BY CategoryName');
+    res.json({ success: true, categories: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ดึงสินค้าตามหมวดหมู่
+app.get('/products', async (req, res) => {
+  const { category } = req.query; // category ส่งจาก frontend เช่น "Bread"
+
+  if (!category) {
+    return res.status(400).json({ success: false, error: "กรุณาส่ง category" });
+  }
+
+  try {
+    // ดึง CategoryID จาก Categories
+    const [catRows] = await pool.query(
+      'SELECT CategoryID FROM Categories WHERE CategoryName = ? LIMIT 1',
+      [category]
+    );
+
+    if (catRows.length === 0) {
+      return res.status(404).json({ success: false, error: "ไม่พบหมวดหมู่" });
+    }
+
+    const categoryId = catRows[0].CategoryID;
+
+    // ดึงสินค้าจาก product table
+    const [products] = await pool.query(
+      `SELECT * 
+       FROM products 
+       WHERE CategoryID = ? 
+       ORDER BY CreatedAt DESC`,
+      [categoryId]
+    );
+
+    res.json({ success: true, products });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+
 
 
 const PORT = process.env.PORT || 3001;
