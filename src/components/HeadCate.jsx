@@ -20,15 +20,14 @@ const MenuList = ({ setCategory }) => {
   }, []);
 
   const handleCategoryChange = (e) => {
-    const value = e.target.value;
-    setSelectedCategory(value); // update select
-    setCategory(value); // ส่งค่าไป parent
+    const value = e.target.value.toString(); // แปลงเป็น string
+    setSelectedCategory(value);
+    setCategory(value);
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000); // simulate loading
+    setTimeout(() => setLoading(false), 1000);
   };
+
 
   return (
     <>

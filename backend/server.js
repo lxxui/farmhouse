@@ -193,28 +193,16 @@ app.get('/categories', async (req, res) => {
   }
 });
 
-// ดึงสินค้าตามหมวดหมู่
-app.get('/products', async (req, res) => {
-  const { category } = req.query; // category ส่งจาก frontend เช่น "Bread"
 
-  if (!category) {
-    return res.status(400).json({ success: false, error: "กรุณาส่ง category" });
+// ดึงสินค้าตาม CategoryID
+app.get('/products', async (req, res) => {
+  const { categoryId } = req.query; // ส่งมาจาก frontend เช่น ?categoryId=1
+
+  if (!categoryId) {
+    return res.status(400).json({ success: false, error: "กรุณาส่ง categoryId" });
   }
 
   try {
-    // ดึง CategoryID จาก Categories
-    const [catRows] = await pool.query(
-      'SELECT CategoryID FROM Categories WHERE CategoryName = ? LIMIT 1',
-      [category]
-    );
-
-    if (catRows.length === 0) {
-      return res.status(404).json({ success: false, error: "ไม่พบหมวดหมู่" });
-    }
-
-    const categoryId = catRows[0].CategoryID;
-
-    // ดึงสินค้าจาก product table
     const [products] = await pool.query(
       `SELECT * 
        FROM products 
@@ -229,6 +217,7 @@ app.get('/products', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 
 

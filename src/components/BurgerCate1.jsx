@@ -1,114 +1,58 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const BurgerCate1 = () => {
-  const items = [
-    {
-      img: "/image/26.png",
-      title: "ขนมปังเบอร์เกอร์",
-      price: "฿59",
-      sizes: [
-        { size: "3.5 นิ้ว", weight: "45 กรัม" },
-        { size: "4 นิ้ว", weight: "53 กรัม" },
-        { size: "5 นิ้ว", weight: "86 กรัม" },
-      ],
-    },
-    {
-      img: "/image/27.png",
-      title: "ขนมปังเบอร์เกอร์โรยงา",
-      price: "฿59",
-      sizes: [
-        { size: "3.5 นิ้ว", weight: "45 กรัม" },
-        { size: "4 นิ้ว", weight: "54 กรัม" },
-        { size: "5 นิ้ว", weight: "87.5 กรัม" },
-      ],
-    },
-    {
-      img: "/image/28.png",
-      title: "ขนมปังเบอร์เกอร์บิ๊กแมค",
-      price: "฿59",
-      sizes: null,
-      weight: "73 กรัม",
-    },
-    {
-      img: "/image/29.png",
-      title: "ขนมปังเบอร์เกอร์โรยงาขาวและงาดำ",
-      price: "฿59",
-      sizes: [{ size: "4 นิ้ว", weight: "57 กรัม" }],
-    },
-    {
-      img: "/image/30.png",
-      title: "ขนมปังเบอร์เกอร์บิ๊กแมค",
-      price: "฿59",
-      sizes: null,
-      weight: "51 กรัม",
-    },
-  ];
+const SingleBreadCate = () => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/products?categoryId=8");
+        const data = await res.json();
+
+        if (data.success && data.products) {
+          setItems(data.products);
+        } else {
+          console.error("ไม่พบสินค้าหมวดนี้", data.error);
+        }
+      } catch (err) {
+        console.error("Fetch products error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) return <p>กำลังโหลดสินค้าขนมปังชิ้นเดี่ยว...</p>;
 
   return (
-    <div data-id="8" className="container mt-4">
+    <div data-id="9" className="container mt-4">
       <h4
         className="mt-4"
         style={{ borderLeft: "5px solid #ed1b2f", paddingLeft: 10, fontWeight: "bold" }}
       >
-        🍔 เบอร์เกอร์
+        🍞 ขนมปังชิ้นเดี่ยว
       </h4>
       <p className="text-muted" style={{ marginTop: -10, marginBottom: 20 }}>
-        เบอร์เกอร์ชิ้นโต เนื้อแน่น รสชาติจัดเต็ม พร้อมให้คุณอร่อยเต็มคำทุกคำกัด
+        ขนมปังแบบชิ้นเดียว แป้งล้วน สำหรับทำเมนูหรือรับประทานทันที
       </p>
       <div className="row g-3">
-        {items.map(({ img, title, price, sizes, weight }, idx) => (
-          <div key={idx} className="col-md-3 mb-4">
-            <div className="card h-100 text-center">
-              <div
-                className="image-box mx-auto"
-                style={{ width: 150, height: 150, overflow: "hidden" }}
-              >
-                <img
-                  src={img}
-                  alt={title}
-                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                />
+        {items.map(({ ProductID, ProductName, Price, ShortDescription, ImageURL }) => (
+          <div key={ProductID} className="col-md-3 mb-4">
+            <div className="card h-100 text-center" style={{ borderRadius: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+              <div className="image-box mx-auto" style={{ width: 150, height: 150, overflow: "hidden" }}>
+                <img src={ImageURL} alt={ProductName} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
               </div>
               <div className="card-body text-center">
-                <h5
-                  className="card-title"
-                  style={{ fontWeight: 600, fontSize: "1rem", minHeight: sizes ? undefined : "3.3rem" }}
-                >
-                  {title}
-                </h5>
-                <p
-                  className="card-price"
-                  style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: "0.3rem" }}
-                >
-                  {price}
+                <h5 className="card-title" style={{ fontWeight: 600, fontSize: "1rem" }}>{ProductName}</h5>
+                <p className="card-price" style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: "0.3rem" }}>
+                  {Price} ฿
                 </p>
-
-                {sizes ? (
-                  <div
-                    className="card-text"
-                    style={{ color: "#555", fontSize: "0.9rem", marginBottom: "1rem" }}
-                  >
-                    {sizes.map(({ size, weight }) => (
-                      <div key={size}>
-                        <i className="fas fa-ruler-horizontal me-2" style={{ color: "#007bff" }}></i>
-                        {size}
-                        <i
-                          className="fas fa-weight-hanging ms-3 me-2"
-                          style={{ color: "#dc3545" }}
-                        ></i>
-                        {weight}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p
-                    className="card-text"
-                    style={{ color: "#555", fontSize: "0.9rem", marginBottom: "1rem" }}
-                  >
-                    <i className="fas fa-weight-hanging me-1"></i> {weight}
-                  </p>
-                )}
-
+                <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: 16 }}>
+                  <i className="fas fa-weight-hanging me-1"></i> {ShortDescription}
+                </p>
                 <button className="btn btn-danger" style={{ borderRadius: 25 }}>
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
                 </button>
@@ -121,4 +65,4 @@ const BurgerCate1 = () => {
   );
 };
 
-export default BurgerCate1;
+export default SingleBreadCate;
