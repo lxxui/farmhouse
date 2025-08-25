@@ -112,11 +112,7 @@ const Navbar = ({ user, setUser, setFormData }) => {
     return (
         <div className="container">
             <nav
-                className="navbar navbar-expand-lg navbar-custom sticky-top"
-                style={{
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    zIndex: 999
-                }}
+                className="navbar navbar-expand-lg navbar-custom"
             >
                 <div id="clickable-image" className="logo">
                     <Link to="/" className="d-inline-block">
@@ -205,6 +201,7 @@ const Navbar = ({ user, setUser, setFormData }) => {
 
                         {/* ตะกร้าสินค้า */}
                         <div
+                            id="cart-icon"   // ✅ เพิ่ม id ตรงนี้
                             className="cart-icon position-relative"
                             style={{ fontSize: 24, color: "white", cursor: "pointer" }}
                             onClick={() => navigate("/cart")} // ไปหน้าตะกร้า
@@ -216,6 +213,7 @@ const Navbar = ({ user, setUser, setFormData }) => {
                                 </span>
                             )}
                         </div>
+
                     </div>
                 </div>
             </nav>
