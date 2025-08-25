@@ -1,11 +1,13 @@
 // HotdogCate.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { CartContext } from "./cartContact";
 
 const HotdogCate = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useContext(CartContext); // ✅ ใช้ CartContext
 
-useEffect(() => {
+  useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:3001/products?categoryId=2");
@@ -26,7 +28,6 @@ useEffect(() => {
     fetchProducts();
   }, []);
 
-
   if (loading) {
     return <div className="container mt-3">กำลังโหลดสินค้า...</div>;
   }
@@ -35,7 +36,11 @@ useEffect(() => {
     <div data-id="2" className="container mt-3 mb-5">
       <h4
         className="mt-3 mb-3"
-        style={{ borderLeft: "5px solid #ed1b2f", paddingLeft: 10, fontWeight: "bold" }}
+        style={{
+          borderLeft: "5px solid #ed1b2f",
+          paddingLeft: 10,
+          fontWeight: "bold",
+        }}
       >
         🌭 ฮอทดอก
       </h4>
@@ -44,12 +49,15 @@ useEffect(() => {
       </p>
 
       <div className="row g-3">
-        {items.map(({ ProductName, Price, Weight, ImageURL, Badge }, idx) => (
-          <div key={idx} className="col-md-3 mb-4">
+        {items.map(({ ProductID, ProductName, Price, Weight, ImageURL, Badge }) => (
+          <div key={ProductID} className="col-md-3 mb-4">
             <div className="card h-100 text-center">
               {Badge && <div className="category-badge">{Badge}</div>}
 
-              <div className="image-box mx-auto" style={{ width: 150, height: 150, overflow: "hidden" }}>
+              <div
+                className="image-box mx-auto"
+                style={{ width: 150, height: 150, overflow: "hidden" }}
+              >
                 <img
                   src={ImageURL}
                   style={{ width: "100%", height: "100%", objectFit: "contain" }}
@@ -58,16 +66,45 @@ useEffect(() => {
               </div>
 
               <div className="card-body text-center">
-                <h5 className="card-title" style={{ fontWeight: 600, fontSize: "1rem" }}>
+                <h5
+                  className="card-title"
+                  style={{ fontWeight: 600, fontSize: "1rem" }}
+                >
                   {ProductName}
                 </h5>
-                <p className="card-price" style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: "0.3rem" }}>
+                <p
+                  className="card-price"
+                  style={{
+                    fontWeight: 700,
+                    fontSize: "1.3rem",
+                    marginBottom: "0.3rem",
+                  }}
+                >
                   {Price} ฿
                 </p>
-                <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                <p
+                  className="card-text"
+                  style={{
+                    color: "#555",
+                    fontSize: "0.9rem",
+                    marginBottom: "1rem",
+                  }}
+                >
                   <i className="fas fa-weight-hanging me-1"></i> {Weight}
                 </p>
-                <button className="btn btn-danger" style={{ borderRadius: 25 }}>
+                <button
+                  className="btn btn-danger"
+                  style={{ borderRadius: 25 }}
+                  onClick={() =>
+                    addToCart({
+                      ProductID,
+                      ProductName,
+                      Price,
+                      ImageURL,
+                      quantity: 1, // ✅ จำนวนเริ่มต้น
+                    })
+                  }
+                >
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
                 </button>
               </div>

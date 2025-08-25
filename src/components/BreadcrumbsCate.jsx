@@ -1,32 +1,34 @@
 // BreadcrumbsCategory.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { CartContext } from "./cartContact";
 
 const BreadcrumbsCate = () => {
-    const [items, setItems] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { addToCart } = useContext(CartContext); // ✅ ใช้ CartContext
 
-    useEffect(() => {
-      const fetchProducts = async () => {
-        try {
-          // ส่ง category เป็นชื่อหมวดหมู่ใน DB (ตรงกับ CategoryName)
-          const res = await fetch("http://localhost:3001/products?categoryId=7");
-          const data = await res.json();
-  
-          if (data.success && data.products) {
-            setItems(data.products);
-          } else {
-            console.error("ไม่พบสินค้าหมวดนี้", data.error);
-          }
-        } catch (err) {
-          console.error("Fetch products error:", err);
-        } finally {
-          setLoading(false);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/products?categoryId=7");
+        const data = await res.json();
+
+        if (data.success && data.products) {
+          setItems(data.products);
+        } else {
+          console.error("ไม่พบสินค้าหมวดนี้", data.error);
         }
-      };
-  
-      fetchProducts();
-    }, []);
+      } catch (err) {
+        console.error("Fetch products error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchProducts();
+  }, []);
+
+  if (loading) return <p>กำลังโหลดสินค้า...</p>;
 
   return (
     <div data-id="7" className="container mt-4">
@@ -89,6 +91,15 @@ const BreadcrumbsCate = () => {
                 <button
                   className="btn btn-danger"
                   style={{ borderRadius: 25 }}
+                  onClick={() =>
+                    addToCart({
+                      ProductID,
+                      ProductName,
+                      Price,
+                      ImageURL,
+                      quantity: 1, // ✅ ใส่จำนวนเริ่มต้น
+                    })
+                  }
                 >
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
                 </button>

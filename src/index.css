@@ -255,6 +255,9 @@ a.text-white.text-decoration-none:active {
 .navbar {
     background-color: #D90000;
     overflow: hidden;
+    position: sticky;
+    /* ทำให้ติดขอบบน */
+
 }
 
 .navbar a {

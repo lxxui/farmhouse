@@ -1,3 +1,4 @@
+// src/App.js
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -15,48 +16,37 @@ import BreadcrumbsCate from "./components/breadcrumbsCate";
 import BurgerCate1 from "./components/burgerCate1";
 import Footer from "./components/footer";
 import CheckStatus from "./components/checkStatus";
-import LoginPage from "./components/loginpage"; // import LoginPage
+import LoginPage from "./components/loginpage";
 import ProfilePage from "./components/profile";
 import AddProduct from "./components/addProduct";
+import CartPage from "./components/cartPage";
 
+// ✅ import CartProvider ให้ตรง path
+import { CartProvider } from "./components/cartContact";
 function App() {
-  // ประกาศ state category
   const [category, setCategory] = useState("");
-  // ประกาศ state user สำหรับ login
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-  const savedUser = localStorage.getItem("user");
-  if (savedUser) {
-    setUser(JSON.parse(savedUser));
-  }
-}, []);
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
 
   const handleLogout = () => {
     setUser(null);
-    // ถ้าอยากให้เด้งไปหน้าแรก
     window.location.href = "/";
   };
 
-//   const handleLoginSuccess = (userData) => {
-//   setUser(userData);
-//   localStorage.setItem("user", JSON.stringify(userData));
-// };
-
-
-
   return (
     <BrowserRouter>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          minHeight: "100vh",
-        }}
-      >
-        {/* Navbar กับเนื้อหาทั้งหมด */}
+      <CartProvider>
+        {/* Navbar ควรอยู่ข้างนอก container scroll */}
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 999 }}>
+          <Navbar user={user} setUser={setUser} handleLogout={handleLogout} />
+        </div>
         <div style={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-          <Navbar user={user} setUser={setUser}  handleLogout={handleLogout}/>
           <Routes>
             <Route
               path="/"
@@ -65,8 +55,6 @@ function App() {
                   <Promotion />
                   <TipsSection />
                   <MenuList setCategory={setCategory} />
-
-                  {/* แสดง component เมนูที่กรองตาม category */}
                   {(category === "" || category === "1") && <BreadMenu category={category} />}
                   {(category === "" || category === "2") && <HotdogCate category={category} />}
                   {(category === "" || category === "3") && <BurgerCate category={category} />}
@@ -78,18 +66,18 @@ function App() {
                 </>
               }
             />
+            <Route path="/cart" element={<CartPage />} />
             <Route path="/checkStatus" element={<CheckStatus />} />
             <Route path="/login" element={<LoginPage setUser={setUser} />} />
             <Route path="/profile" element={<ProfilePage user={user} setUser={setUser} handleLogout={handleLogout} />} />
             <Route path="/addproduct" element={<AddProduct setUser={setUser} />} />
-
           </Routes>
         </div>
 
-        {/* Footer */}
         <Footer />
-      </div>
+      </CartProvider>
     </BrowserRouter>
+
   );
 }
 

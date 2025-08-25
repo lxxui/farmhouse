@@ -1,11 +1,11 @@
 // src/components/navbar.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import LoginPage from "./loginpage"
 import { useNavigate } from "react-router-dom";
 // import checkStatus from "./checkStatus"
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
-
+import { CartContext } from "./cartContact";
 
 
 const Navbar = ({ user, setUser, setFormData }) => {
@@ -13,8 +13,8 @@ const Navbar = ({ user, setUser, setFormData }) => {
     // const [setLangDropdownOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false); // toggle hamburger menu
     const [showPopup, setShowPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
-
-    // const modalContentRef = useRef(null);
+    const { cartItems } = useContext(CartContext);
+    const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0); // รวมจำนวนสินค้า
 
     // ฟังก์ชัน logout
     const handleLogout = () => {
@@ -111,16 +111,22 @@ const Navbar = ({ user, setUser, setFormData }) => {
 
     return (
         <div className="container">
-            <nav user={user} setUser={setUser} setFormData={setFormData} className="navbar navbar-expand-lg navbar-custom d-flex align-items-center flex-wrap">
+            <nav
+                className="navbar navbar-expand-lg navbar-custom sticky-top"
+                style={{
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    zIndex: 999
+                }}
+            >
                 <div id="clickable-image" className="logo">
-                    <a href="/" className="d-inline-block">
+                    <Link to="/" className="d-inline-block">
                         <img
                             src="/image/logo_top.png"
                             alt="ขนมปัง"
                             className="img-fluid"
                             style={{ maxHeight: 50 }}
                         />
-                    </a>
+                    </Link>
                 </div>
                 {/* Hamburger toggle */}
                 <button
@@ -201,16 +207,17 @@ const Navbar = ({ user, setUser, setFormData }) => {
                         <div
                             className="cart-icon position-relative"
                             style={{ fontSize: 24, color: "white", cursor: "pointer" }}
+                            onClick={() => navigate("/cart")} // ไปหน้าตะกร้า
                         >
                             <i className="fas fa-shopping-cart"></i>
-                            <span className="cart-count btn-cart position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                2
-                            </span>
+                            {cartCount > 0 && (
+                                <span className="cart-count btn-cart position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {cartCount}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
-
-
             </nav>
 
             {/*ตรวจสอบสถานะคำสั่งซื้อ*/}
@@ -234,7 +241,7 @@ const Navbar = ({ user, setUser, setFormData }) => {
 
 
             {/* ปุ่มหมวดหมู่สินค้า */}
-            <div className="justify-content-between mt-2">
+            {/* <div className="justify-content-between mt-2">
                 <div className="dropdown">
                     <button
                         id="dropdownBtn"
@@ -333,7 +340,7 @@ const Navbar = ({ user, setUser, setFormData }) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Modal: แสดง LoginPage component */}
             {showPopup && (

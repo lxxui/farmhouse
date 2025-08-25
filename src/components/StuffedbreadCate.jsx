@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { CartContext } from "./cartContact"; // import context
 
 const StuffedBreadCate = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useContext(CartContext); // ใช้ addToCart
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -52,7 +54,11 @@ const StuffedBreadCate = () => {
                 <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: "1rem" }}>
                   <i className="fas fa-weight-hanging me-1"></i> {ShortDescription}
                 </p>
-                <button className="btn btn-danger" style={{ borderRadius: 25 }}>
+                <button
+                  className="btn btn-danger"
+                  style={{ borderRadius: 25 }}
+                  onClick={() => addToCart({ ProductID, ProductName, Price, ImageURL, quantity: 1 })}
+                >
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
                 </button>
               </div>

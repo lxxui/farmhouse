@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
+// BurgerCate.jsx
+import React, { useEffect, useState, useContext } from "react";
+import { CartContext } from "./cartContact";
 
 const BurgerCate = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useContext(CartContext); // ✅ ใช้งาน CartContext
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -47,7 +50,19 @@ const BurgerCate = () => {
                 <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: 16 }}>
                   <i className="fas fa-weight-hanging me-1"></i> {ShortDescription}
                 </p>
-                <button className="btn btn-danger" style={{ borderRadius: 25 }}>
+                <button
+                  className="btn btn-danger"
+                  style={{ borderRadius: 25 }}
+                  onClick={() =>
+                    addToCart({
+                      ProductID,
+                      ProductName,
+                      Price,
+                      ImageURL,
+                      quantity: 1, // ✅ เริ่มต้นจำนวนเป็น 1
+                    })
+                  }
+                >
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
                 </button>
               </div>

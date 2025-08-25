@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
+// CakeCate.jsx
+import React, { useEffect, useState, useContext } from "react";
+import { CartContext } from "./cartContact";
 
 const CakeCate = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useContext(CartContext); // ✅ ใช้ CartContext
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -58,13 +61,31 @@ const CakeCate = () => {
                 <h5 className="card-title" style={{ fontWeight: 600, fontSize: "1rem" }}>
                   {ProductName}
                 </h5>
-                <p className="card-price" style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: "0.3rem" }}>
+                <p
+                  className="card-price"
+                  style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: "0.3rem" }}
+                >
                   {Price} ฿
                 </p>
-                <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: "1rem" }}>
+                <p
+                  className="card-text"
+                  style={{ color: "#555", fontSize: "0.9rem", marginBottom: "1rem" }}
+                >
                   <i className="fas fa-weight-hanging me-1"></i> {ShortDescription}
                 </p>
-                <button className="btn btn-danger" style={{ borderRadius: 25 }}>
+                <button
+                  className="btn btn-danger"
+                  style={{ borderRadius: 25 }}
+                  onClick={() =>
+                    addToCart({
+                      ProductID,
+                      ProductName,
+                      Price,
+                      ImageURL,
+                      quantity: 1, // ✅ ใส่จำนวนเริ่มต้น
+                    })
+                  }
+                >
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
                 </button>
               </div>

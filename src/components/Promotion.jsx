@@ -10,7 +10,7 @@ const images = [
 
 const Carousel = () => {
   return (
-    <div className="container">
+<div className="container" style={{ marginTop: "60px" }}>
       <div
         id="carouselExample"
         className="carousel slide carousel-fade mt-2"
