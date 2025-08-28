@@ -34,7 +34,11 @@ const BreadMenu = () => {
   };
 
   const handleAddToCart = (product, e) => {
-    const quantity = quantities[product.ProductID] || 1;
+    // ดึงค่า input number จาก card ที่กด
+    const input = e.currentTarget.closest(".card").querySelector("input[type='number']");
+    const quantity = parseInt(input.value) || 1;
+
+    // เพิ่มสินค้าลงตะกร้า
     addToCart({ ...product, quantity });
 
     // หา cart icon
@@ -88,8 +92,7 @@ const BreadMenu = () => {
       [
         { transform: "translate(0,0) scale(1)", opacity: 1 },
         {
-          transform: `translate(${cartRect.left - imgRect.left}px, ${cartRect.top - imgRect.top
-            }px) scale(0.5)`,
+          transform: `translate(${cartRect.left - imgRect.left}px, ${cartRect.top - imgRect.top}px) scale(0.5)`,
           opacity: 0,
         },
       ],
@@ -136,9 +139,10 @@ const BreadMenu = () => {
                   <input
                     type="number"
                     value={quantities[product.ProductID]}
-                    onChange={e =>
-                      handleQuantityChange(product.ProductID, parseInt(e.target.value))
-                    }
+                    onChange={e => {
+                      const value = parseInt(e.target.value);
+                      handleQuantityChange(product.ProductID, isNaN(value) ? 1 : value);
+                    }}
                     style={{ width: 50, textAlign: "center", margin: "0 5px" }}
                   />
                   <button

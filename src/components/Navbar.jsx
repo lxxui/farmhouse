@@ -201,18 +201,36 @@ const Navbar = ({ user, setUser, setFormData }) => {
 
                         {/* ตะกร้าสินค้า */}
                         <div
-                            id="cart-icon"   // ✅ เพิ่ม id ตรงนี้
-                            className="cart-icon position-relative"
-                            style={{ fontSize: 24, color: "white", cursor: "pointer" }}
-                            onClick={() => navigate("/cart")} // ไปหน้าตะกร้า
+                            id="cart-icon"
+                            className="cart-icon"
+                            style={{ fontSize: 24, color: "white", cursor: "pointer", position: "relative" }}
+                            onClick={() => navigate("/cart")}
                         >
                             <i className="fas fa-shopping-cart"></i>
+
                             {cartCount > 0 && (
-                                <span className="cart-count btn-cart position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                <span
+                                    className="cart-count bg-danger text-white"
+                                    style={{
+                                        position: "absolute",
+                                        top: "-5px",       // ดันขึ้นไปข้างบน
+                                        right: "-10px",    // ดันไปทางขวา
+                                        minWidth: "20px",
+                                        height: "20px",
+                                        borderRadius: "50%",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        fontSize: "12px",
+                                        fontWeight: "bold",
+                                        padding: "0 5px",
+                                    }}
+                                >
                                     {cartCount}
                                 </span>
                             )}
                         </div>
+
 
                     </div>
                 </div>

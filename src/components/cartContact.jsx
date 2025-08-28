@@ -12,11 +12,11 @@ export const CartProvider = ({ children }) => {
       if (existing) {
         return prev.map((item) =>
           item.ProductID === product.ProductID
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + product.quantity }
             : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product }];
     });
   };
 
@@ -32,8 +32,15 @@ export const CartProvider = ({ children }) => {
     );
   };
 
+  // ✅ ฟังก์ชันล้างตะกร้า
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity }}>
+    <CartContext.Provider
+      value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart }}
+    >
       {children}
     </CartContext.Provider>
   );

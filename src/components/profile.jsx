@@ -195,8 +195,8 @@ function ProfilePage({ user, setUser }) {
                     contact_name: formData.contact_name,
                     house_number: formData.house_number,
                     village: formData.village,
-                    street: formData.street,      // ตรงกับ backend
-                    district: formData.district,  // ตรงกับ backend
+                    street: formData.street,
+                    district: formData.district,
                     sub_district: formData.sub_district,
                     province: formData.province,
                     postal_code: formData.postal_code,
@@ -208,23 +208,31 @@ function ProfilePage({ user, setUser }) {
             console.log("Address update response:", data);
 
             if (response.ok && data.success) {
-                setUser(prev => ({
-                    ...prev,
+                // สร้าง object user ใหม่รวม address
+                const updatedUser = {
+                    ...user,
                     address: {
                         contact_name: formData.contact_name,
                         house_number: formData.house_number,
                         village: formData.village,
-                        street: formData.street,         // map จาก formData.road
-                        district: formData.district,     // map จาก formData.amphoe
+                        street: formData.street,
+                        district: formData.district,
                         sub_district: formData.sub_district,
                         province: formData.province,
                         postal_code: formData.postal_code,
                         phone: formData.phone
                     }
-                }));
+                };
+
+                // อัปเดต state
+                setUser(updatedUser);
+
+                // อัปเดต localStorage
+                localStorage.setItem("user", JSON.stringify(updatedUser));
 
                 // ปิดโหมดแก้ไข
-                setIsEditingAddress(false);  // <--- เพิ่มตรงนี้
+                setIsEditingAddress(false);
+
                 Swal.fire({
                     icon: "success",
                     title: "บันทึกข้อมูลเรียบร้อย",
@@ -250,6 +258,7 @@ function ProfilePage({ user, setUser }) {
             });
         }
     };
+
 
     useEffect(() => {
         if (!user?.id) return;
@@ -457,7 +466,7 @@ function ProfilePage({ user, setUser }) {
     };
 
     return (
-        <div className="container">
+        <div className="container" style={{ marginTop: 50 }}>
             <div className="container-fluid mt-4">
                 <div className="row">
                     {/* Sidebar */}

@@ -23,6 +23,7 @@ import CartPage from "./components/cartPage";
 
 // ✅ import CartProvider ให้ตรง path
 import { CartProvider } from "./components/cartContact";
+import CheckoutPage from "./components/checkoutPage";
 function App() {
   const [category, setCategory] = useState("");
   const [user, setUser] = useState(null);
@@ -66,11 +67,13 @@ function App() {
                 </>
               }
             />
-            <Route path="/cart" element={<CartPage />} />
+            <Route path="/cart" element={<CartPage user={user} />} />
             <Route path="/checkStatus" element={<CheckStatus />} />
             <Route path="/login" element={<LoginPage setUser={setUser} />} />
             <Route path="/profile" element={<ProfilePage user={user} setUser={setUser} handleLogout={handleLogout} />} />
             <Route path="/addproduct" element={<AddProduct setUser={setUser} />} />
+            <Route path="/checkoutPage" element={<CheckoutPage user={user} setUser={setUser} />} />
+
           </Routes>
         </div>
 

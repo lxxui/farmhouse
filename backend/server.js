@@ -220,6 +220,121 @@ app.get('/products', async (req, res) => {
 
 
 
+// สร้างคำสั่งซื้อใหม่
+app.post("/orders", async (req, res) => {
+  const { user_id, contact_name, phone, address, payment_method, total_price, items } = req.body;
+
+  // ตรวจสอบข้อมูลครบถ้วน
+  if (!user_id || !contact_name || !phone || !address || !payment_method || !items?.length) {
+    return res.status(400).json({ success: false, message: "ข้อมูลคำสั่งซื้อไม่ครบถ้วน" });
+  }
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // ดึง AUTO_INCREMENT ของ orders เพื่อสร้าง order_number
+    const [[{ AUTO_INCREMENT: nextId }]] = await conn.query(
+      "SELECT AUTO_INCREMENT FROM information_schema.tables WHERE table_name = 'orders' AND table_schema = DATABASE()"
+    );
+
+    const orderNumber = `FH${String(nextId || 1).padStart(6, '0')}`;
+
+    // Insert order หลัก
+    const [orderResult] = await conn.query(
+      `INSERT INTO orders 
+       (user_id, order_number, contact_name, phone, address, payment_method, total_price, created_at) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [user_id, orderNumber, contact_name, phone, address, payment_method, total_price]
+    );
+
+    const orderId = orderResult.insertId;
+
+    // เตรียมข้อมูล order_items
+    const itemValues = [];
+    for (let item of items) {
+      if (!item.product_name) {
+        const [rows] = await conn.query(
+          "SELECT ProductName FROM products WHERE ProductID = ?",
+          [item.product_id]
+        );
+        item.product_name = rows[0]?.ProductName || "Unknown";
+      }
+
+      itemValues.push([
+        orderId,
+        orderNumber, // ใช้ order_number เดียวกัน
+        item.product_id,
+        item.product_name,
+        item.quantity,
+        item.price,
+        item.discount || 0
+      ]);
+    }
+
+    // Insert order_items แบบ batch
+    if (itemValues.length) {
+      await conn.query(
+        `INSERT INTO order_items (order_id, order_number, product_id, product_name, quantity, price, discount) VALUES ?`,
+        [itemValues]
+      );
+    }
+
+    await conn.commit();
+
+    res.json({ success: true, orderId, orderNumber, items: itemValues });
+  } catch (err) {
+    await conn.rollback();
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    conn.release();
+  }
+});
+
+
+// ดึงคำสั่งซื้อของ user พร้อม order_items
+app.get("/orders/user/:userId", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // ดึง orders ของ user
+    const [orders] = await pool.query(
+      "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC",
+      [userId]
+    );
+
+    // ถ้าไม่มี order
+    if (!orders.length) return res.json({ success: true, orders: [] });
+
+    // ดึง order_items ของแต่ละ order
+    const orderIds = orders.map(o => o.id);
+    const [items] = await pool.query(
+      `SELECT * FROM order_items WHERE order_id IN (?)`,
+      [orderIds]
+    );
+
+    // map items เข้าแต่ละ order
+    const ordersWithItems = orders.map(order => {
+      return {
+        ...order,
+        items: items.filter(i => i.order_id === order.id)
+      };
+    });
+
+    res.json({ success: true, orders: ordersWithItems });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+
+
+
+
+
 
 
 
