@@ -157,20 +157,20 @@ app.get("/user/:id", async (req, res) => {
 // อัปเดต/เพิ่มข้อมูล address
 app.put("/user/:id/address", async (req, res) => {
   const { id } = req.params;
-  const { contact_name, house_number, village, street, sub_district, district, province, postal_code, phone } = req.body;
+  const { contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone } = req.body;
 
   console.log("PUT /user/:id/address hit", id, req.body);
 
   try {
     await pool.query(
       `INSERT INTO address 
-        (user_id, contact_name, house_number, village, street, sub_district, district, province, postal_code, phone) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE 
-         contact_name=?, house_number=?, village=?, street=?, sub_district=?, district=?, province=?, postal_code=?, phone=?`,
+    (user_id, contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone) 
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+   ON DUPLICATE KEY UPDATE 
+     contact_name=?, house_number=?, village=?, lane=?, street=?, sub_district=?, district=?, province=?, postal_code=?, phone=?`,
       [
-        id, contact_name, house_number, village, street, sub_district, district, province, postal_code, phone,
-        contact_name, house_number, village, street, sub_district, district, province, postal_code, phone
+        id, contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone,
+        contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone
       ]
     );
 
@@ -293,34 +293,76 @@ app.post("/orders", async (req, res) => {
 });
 
 
-// ดึงคำสั่งซื้อของ user พร้อม order_items
-app.get("/orders/user/:userId", async (req, res) => {
-  const { userId } = req.params;
+// ดึงคำสั่งซื้อทั้งหมดของ user
+app.get("/orders/user/:id", async (req, res) => {
+  const { id } = req.params;
 
   try {
-    // ดึง orders ของ user
+    // ดึงข้อมูล orders ของ user
     const [orders] = await pool.query(
-      "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC",
-      [userId]
+      `SELECT o.id, o.order_number, o.contact_name, o.phone, o.address,
+              o.payment_method, o.total_price, o.status, o.created_at
+       FROM orders o
+       WHERE o.user_id = ?
+       ORDER BY o.created_at DESC`,
+      [id]
     );
 
-    // ถ้าไม่มี order
-    if (!orders.length) return res.json({ success: true, orders: [] });
+    if (orders.length === 0) {
+      return res.json({ success: true, orders: [] });
+    }
 
-    // ดึง order_items ของแต่ละ order
-    const orderIds = orders.map(o => o.id);
+    // ดึง order_items ที่เกี่ยวข้องทั้งหมด
+    const orderIds = orders.map((o) => o.id);
     const [items] = await pool.query(
-      `SELECT * FROM order_items WHERE order_id IN (?)`,
+      `SELECT oi.order_id, oi.product_id, oi.product_name, oi.quantity, oi.price, oi.discount
+       FROM order_items oi
+       WHERE oi.order_id IN (?)`,
       [orderIds]
     );
 
-    // map items เข้าแต่ละ order
-    const ordersWithItems = orders.map(order => {
-      return {
-        ...order,
-        items: items.filter(i => i.order_id === order.id)
-      };
-    });
+    // จัด group item ไปใส่ในแต่ละ order
+    const ordersWithItems = orders.map((order) => ({
+      ...order,
+      items: items.filter((it) => it.order_id === order.id),
+    }));
+
+    res.json({ success: true, orders: ordersWithItems });
+  } catch (err) {
+    console.error("❌ Error fetching orders:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+
+// ดึงคำสั่งซื้อทั้งหมด (สำหรับ admin)
+app.get("/admin/orders", async (req, res) => {
+  try {
+    const [orders] = await pool.query(
+      `SELECT o.id, o.order_number, o.contact_name, o.phone, o.address,
+              o.payment_method, o.total_price, o.status, o.created_at
+       FROM orders o
+       ORDER BY o.created_at DESC`
+    );
+
+    if (orders.length === 0) {
+      return res.json({ success: true, orders: [] });
+    }
+
+    // ดึง order_items ที่เกี่ยวข้องทั้งหมด
+    const orderIds = orders.map(o => o.id);
+    const [items] = await pool.query(
+      `SELECT oi.order_id, oi.product_id, oi.product_name, oi.quantity, oi.price, oi.discount
+       FROM order_items oi
+       WHERE oi.order_id IN (?)`,
+      [orderIds]
+    );
+
+    // จัด group item ไปใส่ในแต่ละ order
+    const ordersWithItems = orders.map(order => ({
+      ...order,
+      items: items.filter(it => it.order_id === order.id)
+    }));
 
     res.json({ success: true, orders: ordersWithItems });
   } catch (err) {
@@ -329,9 +371,53 @@ app.get("/orders/user/:userId", async (req, res) => {
   }
 });
 
+// อัปเดตสถานะ order (admin)
+app.put("/admin/orders/:id/status", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) return res.status(400).json({ success: false, error: "กรุณาระบุ status" });
+
+  try {
+    const [result] = await pool.query("UPDATE orders SET status = ? WHERE id = ?", [status, id]);
+    if (result.affectedRows === 0)
+      return res.status(404).json({ success: false, error: "ไม่พบคำสั่งซื้อ" });
+
+    res.json({ success: true, id, status });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 
 
+// ยกเลิกคำสั่งซื้อ (เฉพาะ pending)
+app.put("/orders/:id/cancel", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // ตรวจสอบสถานะก่อน
+    const [rows] = await pool.query("SELECT status FROM orders WHERE id = ?", [id]);
+    if (rows.length === 0) return res.status(404).json({ success: false, message: "ไม่พบคำสั่งซื้อ" });
+
+    if (rows[0].status !== "pending") {
+      return res.status(400).json({ success: false, message: "คำสั่งซื้อไม่สามารถยกเลิกได้" });
+    }
+
+    // อัปเดตสถานะ
+    const cancelledAt = new Date();
+    await pool.query(
+      "UPDATE orders SET status = ?, cancelled_at = ? WHERE id = ?",
+      ["cancelled", cancelledAt, id]
+    );
+
+    res.json({ success: true, cancelled_at: cancelledAt });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
 
 
 

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import provinces from '../data/provinces.json';
 import districts from '../data/districts.json';
 import subdistricts from '../data/subdistricts.json';
-import OrderStatus from '../components/checkStatus';
+// import OrderStatus from '../components/checkStatus';
 import AddProduct from "./addProduct";
 
 import Swal from "sweetalert2";
+import AdminOrders from "./adminOrders";
 
 function ProfilePage({ user, setUser }) {
     const [activeMenu, setActiveMenu] = useState("profile");
@@ -21,12 +22,14 @@ function ProfilePage({ user, setUser }) {
         contact_name: "",
         house_number: "",
         village: "",
-        street: "",      // เดิมคือ road
+        lane: "",         // ✅ เพิ่มตรงนี้
+        street: "",
         sub_district: "",
-        district: "",    // เดิมคือ amphoe
+        district: "",
         province: "",
         postal_code: "",
     });
+
 
 
     // อัปเดต formData เมื่อ user ถูกโหลด
@@ -73,6 +76,7 @@ function ProfilePage({ user, setUser }) {
                         contact_name: data.address.contact_name || "",
                         house_number: data.address.house_number || "",
                         village: data.address.village || "",
+                        lane: data.address.lane || "",
                         street: data.address.street || "",
                         province: data.address.province || "",
                         district: data.address.district || "",
@@ -102,10 +106,11 @@ function ProfilePage({ user, setUser }) {
     const menuItems = [
         { key: "profile", label: "ข้อมูลส่วนตัว", icon: "fas fa-user" },
         { key: "address", label: "ข้อมูลที่อยู่", icon: "fas fa-map-marker-alt" },
-        { key: "orders", label: "ติดตามการสั่งซื้อ", icon: "fas fa-box" },
+        // { key: "orders", label: "ติดตามการสั่งซื้อ", icon: "fas fa-box" },
         // { key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }
         ...(user?.role === "admin"
-            ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }]
+            ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" },
+            { key: "adminOrders", label: "จัดการคำสั่งซื้อ", icon: "fas fa-box" },]
             : []),
     ];
 
@@ -195,6 +200,7 @@ function ProfilePage({ user, setUser }) {
                     contact_name: formData.contact_name,
                     house_number: formData.house_number,
                     village: formData.village,
+                    lane: formData.lane,          // ✅ เพิ่มตรงนี้
                     street: formData.street,
                     district: formData.district,
                     sub_district: formData.sub_district,
@@ -215,6 +221,7 @@ function ProfilePage({ user, setUser }) {
                         contact_name: formData.contact_name,
                         house_number: formData.house_number,
                         village: formData.village,
+                        lane: formData.lane,       
                         street: formData.street,
                         district: formData.district,
                         sub_district: formData.sub_district,
@@ -223,7 +230,6 @@ function ProfilePage({ user, setUser }) {
                         phone: formData.phone
                     }
                 };
-
                 // อัปเดต state
                 setUser(updatedUser);
 
@@ -357,6 +363,18 @@ function ProfilePage({ user, setUser }) {
                             />
                         </div>
                         <div className="col-md-6">
+                            <label>ซอย</label>
+                            <input
+                                type="text"
+                                name="lane"
+                                value={formData.lane || ""}
+                                onChange={handleChange}
+                                className="form-control"
+                                readOnly={!isEditingAddress}
+                            />
+                        </div>
+
+                        <div className="col-md-6">
                             <label>หมู่บ้าน/คอนโด</label>
                             <input
                                 type="text"
@@ -443,19 +461,27 @@ function ProfilePage({ user, setUser }) {
 
                 );
 
-            case "orders":
-                return (
-                    <div>
-                        {/* หน้าเช็คสถานะ*/}
-                        <OrderStatus userId={user.id} />
-                    </div>
-                );
+            // case "orders":
+            //     return (
+            //         <div>
+            //             {/* หน้าเช็คสถานะ*/}
+            //             <OrderStatus userId={user.id} />
+            //         </div>
+            //     );
 
             case "addProduct":
                 return (
                     <div>
                         {/* หน้าเช็คสถานะ*/}
                         <AddProduct userId={user.id} />
+                    </div>
+                );
+
+            case "adminOrders":
+                return (
+                    <div>
+                        {/* หน้าเช็คสถานะ*/}
+                        <AdminOrders userId={user.id} />
                     </div>
                 );
 

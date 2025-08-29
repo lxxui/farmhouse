@@ -110,7 +110,7 @@ const Navbar = ({ user, setUser, setFormData }) => {
 
 
     return (
-        <div className="container">
+        <div > {/**className="container" */}
             <nav
                 className="navbar navbar-expand-lg navbar-custom"
             >
