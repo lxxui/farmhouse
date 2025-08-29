@@ -239,17 +239,24 @@ const Navbar = ({ user, setUser, setFormData }) => {
             {/*ตรวจสอบสถานะคำสั่งซื้อ*/}
             <button
                 type="button"
-                className="btn btn-danger"  // ใช้คลาส bootstrap สีแดง
+                className="btn btn-danger"
                 style={{
                     position: "fixed",
                     bottom: "20px",
                     right: "20px",
                     zIndex: 1000,
-                    borderRadius: "50px",  // ทำให้โค้งมนมาก ๆ
-                    padding: "10px 20px",  // กำหนดขนาดปุ่มให้ดูดี
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)", // เงานิดๆให้ลอยเด่น
+                    borderRadius: "50px",
+                    padding: "10px 20px",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
                 }}
-                onClick={() => navigate("/checkStatus")}
+                onClick={() => {
+                    if (user?.role === "admin") {
+                        navigate("/adminOrders", { state: { userId: user.id } });
+
+                    } else {
+                        navigate("/checkStatus");
+                    }
+                }}
             >
                 ตรวจสอบสถานะคำสั่งซื้อ
             </button>

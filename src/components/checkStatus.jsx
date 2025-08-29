@@ -1,16 +1,35 @@
 import React, { useState, useEffect } from "react";
 import { Tab, Tabs, Table, Badge, Button, Modal, Spinner } from "react-bootstrap";
 import Swal from "sweetalert2";
+import { createRoot } from "react-dom/client"; // ✅ import createRoot
+import LoginPage from "./loginpage";
 
-function OrderStatus({ user }) {
+function OrderStatus({ user, setUser }) {
     const [key, setKey] = useState("all");
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
 
+
     useEffect(() => {
-        if (!user?.id) return;
+        if (!user) {
+            Swal.fire({
+                icon: "warning",
+                title: "กรุณาเข้าสู่ระบบ",
+                html: `<div id="login-popup"></div>`,
+                didOpen: () => {
+                    const container = document.getElementById("login-popup");
+                    const root = createRoot(container);
+                    root.render(
+                        <LoginPage setUser={setUser} onClose={() => Swal.close()} />
+                    );
+                },
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
+            return; // ✅ ป้องกันการเรียก fetchOrders() ถ้า user ยังไม่ได้ login
+        }
 
         const fetchOrders = async () => {
             setLoading(true);
@@ -28,7 +47,9 @@ function OrderStatus({ user }) {
         };
 
         fetchOrders();
-    }, [user]);
+    }, [user, setUser]);
+
+    if (!user) return null; // ✅ ไม่ render ตารางจนกว่า login
 
     const handleShowDetail = (order) => setSelectedOrder(order) || setShowModal(true);
     const handleClose = () => { setShowModal(false); setSelectedOrder(null); }
@@ -89,7 +110,7 @@ function OrderStatus({ user }) {
     if (!orders.length) return <div className="text-center mt-5">คุณยังไม่มีคำสั่งซื้อ</div>;
 
     return (
-        <div className="container" style={{ paddingTop: "80px" }}>
+        <div className="container" style={{ paddingTop: '80px',paddingBottom: '20px' }}>
             <h4 className="mb-3">ตรวจสอบสถานะคำสั่งซื้อ</h4>
 
             <Tabs id="statusTab" activeKey={key} onSelect={(k) => setKey(k)} className="mb-3">

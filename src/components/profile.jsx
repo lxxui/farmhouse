@@ -492,7 +492,7 @@ function ProfilePage({ user, setUser }) {
     };
 
     return (
-        <div className="container" style={{ marginTop: 50 }}>
+        <div className="container" style={{ paddingTop: '80px',paddingBottom: '20px' }}>
             <div className="container-fluid mt-4">
                 <div className="row">
                     {/* Sidebar */}

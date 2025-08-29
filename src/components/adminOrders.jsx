@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Badge, Spinner, Modal, Form, Row, Col } from "react-bootstrap";
+import { useLocation } from "react-router-dom";
 
 export default function AdminOrders() {
     const [orders, setOrders] = useState([]);
@@ -13,6 +14,7 @@ export default function AdminOrders() {
     const [page, setPage] = useState(1);
     const [pageSize] = useState(20);
 
+
     const statusColor = {
         pending: "warning",
         confirmed: "primary",
@@ -21,6 +23,19 @@ export default function AdminOrders() {
         completed: "success",
         cancelled: "danger",
     };
+
+    const location = useLocation();
+
+    // ต้องประกาศ state ก่อน
+    const [userId, setUserId] = useState(null);
+
+    useEffect(() => {
+        const stateUserId = location.state?.userId;
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+
+        setUserId(stateUserId || storedUser?.id); // ใช้ setUserId ได้เลย
+    }, [location.state]);
+
 
     // โหลด orders + count status
     useEffect(() => {

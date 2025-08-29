@@ -96,7 +96,7 @@ const HotdogCate = () => {
       <h4 className="mt-3 mb-3" style={{ borderLeft: "5px solid #ed1b2f", paddingLeft: 10, fontWeight: "bold" }}>
         🌭 ฮอทดอก
       </h4>
-      <p className="text-muted" style={{ marginTop: -10, marginBottom: 20 }}>
+      <p className="text-muted" style={{ marginTop: -10, ตรวจสอบสถานะคำสั่งซื้อBottom: 20 }}>
         ฮอทดอกรสชาติหลากหลาย ไส้แน่น ๆ พร้อมทาน อิ่มอร่อยง่าย ๆ ทุกมื้อ
       </p>
 

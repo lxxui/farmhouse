@@ -24,7 +24,7 @@ const CartPage = ({ user }) => {
     const userAddress = user?.address || {}; // ป้องกัน undefined
 
     return (
-        <div className="container mt-4 mb-5">
+        <div className="container" style={{ paddingTop: '80px', paddingBottom: '20px' }}>
             <h3 className="mb-4" style={{ color: "#ed1b2f" }}>ตะกร้าสินค้า</h3>
 
             {cartItems.map((item) => (
@@ -84,16 +84,24 @@ const CartPage = ({ user }) => {
             </div>
 
             <div className="d-flex justify-content-end mt-4">
-                <button className="btn btn-outline-danger me-2" onClick={() => navigate("/")}>
+                <button
+                    className="btn btn-outline-danger"
+                    onClick={() => navigate("/")}
+                    style={{ marginRight: "10px" }} // เว้นระยะจากปุ่มถัดไป
+                >
                     ← เลือกสินค้าต่อ
                 </button>
                 <button
                     className="btn btn-danger"
-                    onClick={() => navigate("/checkoutPage", { state: { user, address: userAddress, cartItems } })}
+                    onClick={() =>
+                        navigate("/checkoutPage", { state: { user, address: userAddress, cartItems } })
+                    }
                 >
                     ชำระเงิน
                 </button>
             </div>
+
+
         </div>
     );
 };

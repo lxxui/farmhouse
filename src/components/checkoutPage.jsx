@@ -139,7 +139,7 @@ const CheckoutPage = ({ user, setUser }) => {
 
 
   return (
-    <div className="container my-4">
+        <div className="container" style={{ paddingTop: '80px',paddingBottom: '20px' }}>
       <h3 className="mb-4 text-danger">ชำระเงิน</h3>
       <div className="row">
         {/* ซ้าย: ข้อมูลผู้สั่ง + ที่อยู่ */}
