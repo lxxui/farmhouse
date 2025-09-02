@@ -371,12 +371,15 @@ app.get("/admin/orders", async (req, res) => {
   }
 });
 
-// อัปเดตสถานะ order (admin)
 app.put("/admin/orders/:id/status", async (req, res) => {
+  console.log("PUT /admin/orders/:id/status body:", req.body); // <-- check body
   const { id } = req.params;
   const { status } = req.body;
 
+  const validStatuses = ["pending", "confirmed", "preparing", "paid", "shipped", "completed", "cancelled"];
   if (!status) return res.status(400).json({ success: false, error: "กรุณาระบุ status" });
+  if (!validStatuses.includes(status))
+    return res.status(400).json({ success: false, error: "สถานะไม่ถูกต้อง" });
 
   try {
     const [result] = await pool.query("UPDATE orders SET status = ? WHERE id = ?", [status, id]);

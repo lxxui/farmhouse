@@ -94,7 +94,7 @@ function OrderStatus({ user, setUser }) {
 
     const statusColor = {
         pending: "warning",
-        checking: "primary",
+        confirm: "primary",      // Admin ตรวจสอบเรียบร้อย
         preparing: "info",
         ready_to_ship: "secondary",
         shipping: "info",
@@ -110,18 +110,19 @@ function OrderStatus({ user, setUser }) {
     if (!orders.length) return <div className="text-center mt-5">คุณยังไม่มีคำสั่งซื้อ</div>;
 
     return (
-        <div className="container" style={{ paddingTop: '80px',paddingBottom: '20px' }}>
+        <div className="container" style={{ paddingTop: '80px', paddingBottom: '20px' }}>
             <h4 className="mb-3">ตรวจสอบสถานะคำสั่งซื้อ</h4>
 
             <Tabs id="statusTab" activeKey={key} onSelect={(k) => setKey(k)} className="mb-3">
                 <Tab eventKey="all" title="ทั้งหมด" />
                 <Tab eventKey="pending" title="รอชำระเงิน" />
-                <Tab eventKey="checking" title="รอตรวจสอบ" />
+                <Tab eventKey="confirmed" title="ยืนยันแล้ว" />
                 <Tab eventKey="preparing" title="รอจัดเตรียม" />
                 <Tab eventKey="ready_to_ship" title="รอจัดส่ง" />
                 <Tab eventKey="shipping" title="ระหว่างจัดส่ง" />
                 <Tab eventKey="delivered" title="จัดส่งเสร็จสิ้น" />
                 <Tab eventKey="cancelled" title="ยกเลิก" />
+
             </Tabs>
 
             <Table bordered hover>

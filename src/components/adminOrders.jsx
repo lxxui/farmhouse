@@ -18,11 +18,13 @@ export default function AdminOrders() {
     const statusColor = {
         pending: "warning",
         confirmed: "primary",
+        preparing: "orange", // เพิ่มสถานะรอจัดสินค้า
         paid: "success",
         shipped: "info",
         completed: "success",
         cancelled: "danger",
     };
+
 
     const location = useLocation();
 
@@ -165,51 +167,94 @@ export default function AdminOrders() {
                     </tr>
                 </thead>
                 <tbody>
-                    {paginatedOrders.length === 0 && (
+                    {paginatedOrders.length === 0 ? (
                         <tr>
                             <td colSpan="6" className="text-center">ไม่มีคำสั่งซื้อ</td>
                         </tr>
+                    ) : (
+                        paginatedOrders.map(order => (
+                            <tr key={order.id}>
+                                <td>{order.order_number}</td>
+                                <td>{order.contact_name} ({order.phone})</td>
+                                <td>{order.total_price.toLocaleString()} บาท</td>
+                                <td>{order.payment_method}</td>
+                                <td>
+                                    <Badge bg={statusColor[order.status] || "secondary"} className="d-inline-block mb-2">
+                                        {order.status}
+                                    </Badge>
+                                </td>
+                                <td>
+                                    <div className="d-flex flex-wrap gap-2">
+                                        {/* ยืนยันคำสั่งซื้อ */}
+                                        <Button
+                                            size="sm"
+                                            variant="outline-primary"
+                                            onClick={() => updateStatus(order.id, "confirmed")}
+                                            disabled={order.status !== "pending"}
+                                        >
+                                            ยืนยัน
+                                        </Button>
+
+                                        {/* รอจัดสินค้า */}
+                                        <Button
+                                            size="sm"
+                                            variant="outline-warning"
+                                            onClick={() => updateStatus(order.id, "preparing")}
+                                            disabled={order.status !== "confirmed"}
+                                        >
+                                            รอจัดสินค้า
+                                        </Button>
+
+                                        {/* จัดส่งแล้ว */}
+                                        <Button
+                                            size="sm"
+                                            variant="outline-info"
+                                            onClick={() => updateStatus(order.id, "shipped")}
+                                            disabled={order.status !== "preparing" && order.status !== "paid"}
+                                        >
+                                            จัดส่งแล้ว
+                                        </Button>
+
+                                        {/* สำเร็จ */}
+                                        <Button
+                                            size="sm"
+                                            variant="success"
+                                            onClick={() => updateStatus(order.id, "completed")}
+                                            disabled={
+                                                (order.payment_method === "COD" && order.status !== "paid") ||
+                                                ["pending", "cancelled"].includes(order.status)
+                                            }
+                                            title={order.payment_method === "COD" && order.status !== "paid" ? "รอยืนยันชำระเงิน COD" : ""}
+                                        >
+                                            สำเร็จ
+                                        </Button>
+
+                                        {/* ยกเลิก */}
+                                        <Button
+                                            size="sm"
+                                            variant="danger"
+                                            onClick={() => updateStatus(order.id, "cancelled")}
+                                            disabled={["completed", "shipped"].includes(order.status)}
+                                        >
+                                            ยกเลิก
+                                        </Button>
+
+                                        {/* ดูรายละเอียด */}
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            onClick={() => handleShowModal(order)}
+                                        >
+                                            ดูรายละเอียด
+                                        </Button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
                     )}
-                    {paginatedOrders.map(order => (
-                        <tr key={order.id}>
-                            <td>{order.order_number}</td>
-                            <td>{order.contact_name} ({order.phone})</td>
-                            <td>{order.total_price} บาท</td>
-                            <td>{order.payment_method}</td>
-                            <td>
-                                <Badge bg={statusColor[order.status] || "secondary"} className="d-inline-block mb-2">
-                                    {order.status}
-                                </Badge>
-                            </td>
-                            <td>
-                                <div className="d-flex flex-wrap gap-2">
-                                    <Button size="sm" variant="outline-primary"
-                                        onClick={() => updateStatus(order.id, "confirmed")}
-                                        disabled={order.status !== "pending"}>ยืนยัน</Button>
-
-                                    <Button size="sm" variant="outline-info"
-                                        onClick={() => updateStatus(order.id, "shipped")}
-                                        disabled={order.status !== "confirmed" && order.status !== "paid"}>จัดส่งแล้ว</Button>
-
-                                    <Button size="sm" variant="success"
-                                        onClick={() => updateStatus(order.id, "completed")}
-                                        disabled={(order.payment_method === "COD" && order.status !== "paid") || order.status === "pending" || order.status === "cancelled"}
-                                        title={order.payment_method === "COD" && order.status !== "paid" ? "รอยืนยันชำระเงิน COD" : ""}>
-                                        สำเร็จ
-                                    </Button>
-
-                                    <Button size="sm" variant="danger"
-                                        onClick={() => updateStatus(order.id, "cancelled")}
-                                        disabled={order.status === "completed" || order.status === "shipped"}>ยกเลิก</Button>
-
-                                    <Button size="sm" variant="secondary"
-                                        onClick={() => handleShowModal(order)}>ดูรายละเอียด</Button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
                 </tbody>
             </Table>
+
 
             {/* Pagination */}
             <div className="d-flex justify-content-between align-items-center mt-3">

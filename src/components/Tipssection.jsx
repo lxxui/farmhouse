@@ -15,19 +15,22 @@ const TipsSection = () => {
               { src: "/image/arti_3.png", alt: "บทความ 3" },
               { src: "/image/arti_4.jpg", alt: "บทความ 4" },
             ].map(({ src, alt }, idx) => (
-              <div className="col-12 col-sm-6 col-md-3" key={idx}>
-                <div className="card">
+              <div key={idx} className="col-12 col-sm-6 col-md-3">
+                <div className="card h-100 shadow-sm">
                   <img
                     src={src}
                     alt={alt}
-                    className="card-img"
+                    className="card-img-top"
                     style={{
                       width: "100%",
-                      height: "200px",       // กำหนดความสูงเท่ากัน
-                      objectFit: "cover",    // ครอบภาพเต็มกรอบโดยไม่บิดเบี้ยว
-                      borderRadius: 6,
+                      height: "220px", // ความสูง fix เท่ากัน
+                      objectFit: "cover",
+                      borderRadius: "6px 6px 0 0",
                     }}
                   />
+                  {/* <div className="card-body text-center">
+                    <p className="card-text">{alt}</p>
+                  </div> */}
                 </div>
               </div>
             ))}
