@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Tab, Tabs, Table, Badge, Button, Modal, Spinner } from "react-bootstrap";
 import Swal from "sweetalert2";
-import { createRoot } from "react-dom/client"; // ✅ import createRoot
+import { createRoot } from "react-dom/client";
 import LoginPage from "./loginpage";
+
 
 function OrderStatus({ user, setUser }) {
     const [key, setKey] = useState("all");
@@ -10,8 +11,9 @@ function OrderStatus({ user, setUser }) {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [ready, setReady] = useState(false); // ✅ รอ login เสร็จ
 
-
+    // แสดง popup login ถ้า user ยังไม่ login
     useEffect(() => {
         if (!user) {
             Swal.fire({
@@ -22,14 +24,28 @@ function OrderStatus({ user, setUser }) {
                     const container = document.getElementById("login-popup");
                     const root = createRoot(container);
                     root.render(
-                        <LoginPage setUser={setUser} onClose={() => Swal.close()} />
+                        <LoginPage
+                            setUser={(u) => {
+                                setUser(u);
+                                setReady(true); // user พร้อม → fetch orders
+                                Swal.close();
+                            }}
+                            onClose={() => Swal.close()}
+                        />
                     );
                 },
                 showConfirmButton: false,
                 allowOutsideClick: false,
             });
-            return; // ✅ ป้องกันการเรียก fetchOrders() ถ้า user ยังไม่ได้ login
+            return;
+        } else {
+            setReady(true);
         }
+    }, [user, setUser]);
+
+    // Fetch orders เมื่อ user พร้อม (ready === true)
+    useEffect(() => {
+        if (!ready) return;
 
         const fetchOrders = async () => {
             setLoading(true);
@@ -47,12 +63,12 @@ function OrderStatus({ user, setUser }) {
         };
 
         fetchOrders();
-    }, [user, setUser]);
+    }, [ready, user]);
 
-    if (!user) return null; // ✅ ไม่ render ตารางจนกว่า login
+    if (!ready) return null; // ไม่ render ตารางจนกว่า login จะเสร็จ
 
-    const handleShowDetail = (order) => setSelectedOrder(order) || setShowModal(true);
-    const handleClose = () => { setShowModal(false); setSelectedOrder(null); }
+    const handleShowDetail = (order) => { setSelectedOrder(order); setShowModal(true); };
+    const handleClose = () => { setShowModal(false); setSelectedOrder(null); };
 
     const handleCancelOrder = async (orderId) => {
         const result = await Swal.fire({
@@ -81,8 +97,6 @@ function OrderStatus({ user, setUser }) {
                             : o
                     )
                 );
-
-                // แจ้ง success
                 Swal.fire('ยกเลิกแล้ว!', 'คำสั่งซื้อของคุณถูกยกเลิกเรียบร้อย', 'success');
             }
         } catch (err) {
@@ -91,16 +105,16 @@ function OrderStatus({ user, setUser }) {
         }
     };
 
-
     const statusColor = {
         pending: "warning",
-        confirm: "primary",      // Admin ตรวจสอบเรียบร้อย
-        preparing: "info",
-        ready_to_ship: "secondary",
-        shipping: "info",
-        delivered: "success",
+        confirmed: "primary",
+        preparing: "info",   // เปลี่ยนจาก orange → info
+        paid: "success",
+        shipped: "secondary", // เปลี่ยนจาก info → secondary (ถ้าต้องแยกจาก preparing)
+        completed: "success",
         cancelled: "danger",
     };
+
 
     const filteredOrders = orders.filter((order) =>
         key === "all" ? true : order.status === key
@@ -122,7 +136,6 @@ function OrderStatus({ user, setUser }) {
                 <Tab eventKey="shipping" title="ระหว่างจัดส่ง" />
                 <Tab eventKey="delivered" title="จัดส่งเสร็จสิ้น" />
                 <Tab eventKey="cancelled" title="ยกเลิก" />
-
             </Tabs>
 
             <Table bordered hover>
@@ -174,12 +187,20 @@ function OrderStatus({ user, setUser }) {
                         <p><strong>ชื่อผู้รับ:</strong> {selectedOrder.contact_name}</p>
                         <p><strong>เบอร์โทรผู้รับ:</strong> {selectedOrder.phone}</p>
                         <p><strong>ที่อยู่จัดส่ง:</strong> {selectedOrder.address}</p>
-                        <p><strong>วิธีชำระเงิน:</strong> {selectedOrder.payment_method === "qr" ? "QR Code" : "ปลายทาง/ออนไลน์"}</p>
+                        <p><strong>วิธีชำระเงิน:</strong>
+                            {selectedOrder.payment_method === "qr" && " QR Code"}
+                            {selectedOrder.payment_method === "bank" && " โอนผ่านธนาคาร"}
+                            {selectedOrder.payment_method === "credit" && " บัตรเครดิต"}
+                            {selectedOrder.payment_method === "cod" && " ชำระปลายทาง"}
+                        </p>
 
+                        {/* แสดงวันที่ยกเลิก ถ้า status เป็น cancelled */}
                         {selectedOrder.status === "cancelled" && selectedOrder.cancelled_at && (
                             <p>
                                 <strong>ยกเลิกเมื่อ:</strong>{" "}
-                                <span style={{ color: 'red' }}>{new Date(selectedOrder.cancelled_at).toLocaleString()}</span>
+                                <span style={{ color: 'red' }}>
+                                    {new Date(selectedOrder.cancelled_at).toLocaleString()}
+                                </span>
                             </p>
                         )}
 
@@ -219,6 +240,7 @@ function OrderStatus({ user, setUser }) {
                     </Modal.Footer>
                 </Modal>
             )}
+
         </div>
     );
 }

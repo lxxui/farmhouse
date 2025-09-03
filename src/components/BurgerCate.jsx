@@ -114,7 +114,12 @@ const BurgerCate = () => {
               </div>
               <div className="card-body text-center">
                 <h5 className="card-title" style={{ fontWeight: 600, fontSize: "1rem" }}>{ProductName}</h5>
-                <p className="card-price" style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: "0.3rem" }}>{Price} ฿</p>
+                <p
+                  className="card-price"
+                  style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: "0.3rem" }}
+                >
+                  {Price} ฿
+                </p>
                 <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: 16 }}>
                   <i className="fas fa-weight-hanging me-1"></i> {ShortDescription}
                 </p>

@@ -108,6 +108,36 @@ const Navbar = ({ user, setUser, setFormData }) => {
     };
 
 
+    const handleCheckStatus = () => {
+        console.log("handleCheckStatus called");
+        console.log("Current user:", user);
+
+        if (!user) {
+            console.log("ยังไม่ได้ login");
+            // user ยังไม่ login → แสดง login popup
+            // setShowLogin(true);
+            return;
+        }
+
+        console.log("User role:", user.role);
+
+        // user มีแล้ว → navigate ตาม role
+        navigateAccordingTorole(user);
+    };
+
+
+    // ฟังก์ชันช่วย navigate
+    const navigateAccordingTorole = (u) => {
+        if (!u) return;
+        if (u.role === "admin") {
+            navigate("/adminOrders", { state: { userId: u.id } });
+        } else {
+            navigate("/checkStatus");
+        }
+    };
+
+
+
 
     return (
         <div > {/**className="container" */}
@@ -249,17 +279,11 @@ const Navbar = ({ user, setUser, setFormData }) => {
                     padding: "10px 20px",
                     boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
                 }}
-                onClick={() => {
-                    if (user?.role === "admin") {
-                        navigate("/adminOrders", { state: { userId: user.id } });
-
-                    } else {
-                        navigate("/checkStatus");
-                    }
-                }}
+                onClick={handleCheckStatus} // ใช้ฟังก์ชันใหม่
             >
                 ตรวจสอบสถานะคำสั่งซื้อ
             </button>
+
 
 
 

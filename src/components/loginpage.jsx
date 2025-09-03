@@ -37,7 +37,7 @@ function LoginPage({ setUser, onClose }) {
                     name: data.name || "",   // ใช้ชื่อจริงจาก backend
                     email: data.email,       // อีเมล
                     phone: data.phone || "" , // เบอร์ dat
-                    Role: data.Role || "" // 
+                    role: data.role || "" // 
                 };
                 setUser(userData);
                 localStorage.setItem("user", JSON.stringify(userData));

@@ -109,8 +109,7 @@ function ProfilePage({ user, setUser }) {
         // { key: "orders", label: "ติดตามการสั่งซื้อ", icon: "fas fa-box" },
         // { key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }
         ...(user?.role === "admin"
-            ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" },
-            { key: "adminOrders", label: "จัดการคำสั่งซื้อ", icon: "fas fa-box" },]
+            ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" },]
             : []),
     ];
 

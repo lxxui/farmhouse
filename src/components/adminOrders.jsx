@@ -18,12 +18,13 @@ export default function AdminOrders() {
     const statusColor = {
         pending: "warning",
         confirmed: "primary",
-        preparing: "orange", // เพิ่มสถานะรอจัดสินค้า
+        preparing: "info",   // เปลี่ยนจาก orange → info
         paid: "success",
-        shipped: "info",
+        shipped: "secondary", // เปลี่ยนจาก info → secondary (ถ้าต้องแยกจาก preparing)
         completed: "success",
         cancelled: "danger",
     };
+
 
 
     const location = useLocation();
@@ -116,13 +117,13 @@ export default function AdminOrders() {
     }
 
     return (
-        <div className="container mt-5">
+        <div className="container mt-5 mb-3">
             <h2 className="mb-4">📦 จัดการคำสั่งซื้อ</h2>
 
             {/* Count Status */}
-            <div className="d-flex flex-wrap gap-2 mb-3">
+            <div className="d-flex flex-wrap mb-3">
                 {Object.entries(statusColor).map(([status, color]) => (
-                    <Badge key={status} bg={color} className="p-2">
+                    <Badge key={status} bg={color} className="p-2 mr-3">
                         {status.charAt(0).toUpperCase() + status.slice(1)}: {counts[status] || 0} ใบ
                     </Badge>
                 ))}
@@ -130,28 +131,36 @@ export default function AdminOrders() {
 
             {/* Filter + Search */}
             <Row className="mb-3 align-items-center">
-                <Col md={4} className="mb-2 mb-md-0">
+                <Col md={8} className="mb-2 mb-md-0">
                     <Form.Control
                         placeholder="ค้นหา Order หรือ ชื่อลูกค้า"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </Col>
-                <Col md={3} className="mb-2 mb-md-0">
-                    <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                        <option value="">สถานะทั้งหมด</option>
-                        {Object.keys(statusColor).map(status => (
-                            <option key={status} value={status}>
-                                {status.charAt(0).toUpperCase() + status.slice(1)}
-                            </option>
-                        ))}
-                    </Form.Select>
+                <Col md={4} className="mb-2 mb-md-0">
+                    <div className="d-flex align-items-center gap-2">
+                        <Form.Select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="">สถานะทั้งหมด</option>
+                            {Object.keys(statusColor).map((status) => (
+                                <option key={status} value={status}>
+                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                </option>
+                            ))}
+                        </Form.Select>&nbsp;&nbsp;
+
+                        <Button
+                            variant="secondary"
+                            onClick={() => { setSearch(""); setStatusFilter(""); setPage(1); }}
+                        >
+                            รีเซ็ต Filter
+                        </Button>
+                    </div>
                 </Col>
-                <Col md={5} className="text-md-end">
-                    <Button variant="secondary" onClick={() => { setSearch(""); setStatusFilter(""); setPage(1); }}>
-                        รีเซ็ต Filter
-                    </Button>
-                </Col>
+
             </Row>
 
             {/* Table */}
@@ -184,38 +193,36 @@ export default function AdminOrders() {
                                     </Badge>
                                 </td>
                                 <td>
-                                    <div className="d-flex flex-wrap gap-2">
-                                        {/* ยืนยันคำสั่งซื้อ */}
+                                    <div className="d-flex flex-wrap">
                                         <Button
                                             size="sm"
                                             variant="outline-primary"
                                             onClick={() => updateStatus(order.id, "confirmed")}
                                             disabled={order.status !== "pending"}
+                                            className="me-2 mb-2"
                                         >
                                             ยืนยัน
-                                        </Button>
-
-                                        {/* รอจัดสินค้า */}
+                                        </Button> &nbsp;&nbsp;
                                         <Button
                                             size="sm"
                                             variant="outline-warning"
                                             onClick={() => updateStatus(order.id, "preparing")}
                                             disabled={order.status !== "confirmed"}
+                                            className="me-2 mb-2"
                                         >
                                             รอจัดสินค้า
-                                        </Button>
+                                        </Button>&nbsp;&nbsp;
 
-                                        {/* จัดส่งแล้ว */}
                                         <Button
                                             size="sm"
                                             variant="outline-info"
                                             onClick={() => updateStatus(order.id, "shipped")}
                                             disabled={order.status !== "preparing" && order.status !== "paid"}
+                                            className="me-2 mb-2"
                                         >
                                             จัดส่งแล้ว
-                                        </Button>
+                                        </Button>&nbsp;&nbsp;
 
-                                        {/* สำเร็จ */}
                                         <Button
                                             size="sm"
                                             variant="success"
@@ -225,30 +232,33 @@ export default function AdminOrders() {
                                                 ["pending", "cancelled"].includes(order.status)
                                             }
                                             title={order.payment_method === "COD" && order.status !== "paid" ? "รอยืนยันชำระเงิน COD" : ""}
+                                            className="me-2 mb-2"
                                         >
                                             สำเร็จ
-                                        </Button>
+                                        </Button>&nbsp;&nbsp;
 
-                                        {/* ยกเลิก */}
                                         <Button
                                             size="sm"
                                             variant="danger"
                                             onClick={() => updateStatus(order.id, "cancelled")}
                                             disabled={["completed", "shipped"].includes(order.status)}
+                                            className="me-2 mb-2"
                                         >
                                             ยกเลิก
-                                        </Button>
+                                        </Button>&nbsp;&nbsp;
 
-                                        {/* ดูรายละเอียด */}
                                         <Button
                                             size="sm"
                                             variant="secondary"
                                             onClick={() => handleShowModal(order)}
+                                            className="me-2 mb-2"
                                         >
                                             ดูรายละเอียด
                                         </Button>
                                     </div>
                                 </td>
+
+
                             </tr>
                         ))
                     )}
