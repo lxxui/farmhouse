@@ -504,7 +504,7 @@ function ProfilePage({ user, setUser }) {
             <div className="container-fluid mt-4">
                 <div className="row">
                     {/* Sidebar */}
-                    <div className="col-md-3 col-sm-12 mb-3">
+                    <div className="col-md-2 col-sm-12 mb-3">
                         <div className="list-group">
                             {menuItems.map(item => {
                                 // ถ้าเป็นเมนู addProduct แต่ user ไม่ใช่ admin ให้ข้าม
@@ -525,7 +525,7 @@ function ProfilePage({ user, setUser }) {
                     </div>
 
                     {/* Content Area */}
-                    <div className="col-md-9 col-sm-12">
+                    <div className="col-md-10 col-sm-12">
                         <div className="card p-3 shadow-sm">{renderContent()}</div>
                     </div>
                 </div>
