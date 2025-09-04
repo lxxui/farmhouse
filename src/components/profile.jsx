@@ -4,6 +4,7 @@ import districts from '../data/districts.json';
 import subdistricts from '../data/subdistricts.json';
 // import OrderStatus from '../components/checkStatus';
 import AddProduct from "./addProduct";
+import ProductManagement from "./productManagement";
 
 import Swal from "sweetalert2";
 import AdminOrders from "./adminOrders";
@@ -106,10 +107,10 @@ function ProfilePage({ user, setUser }) {
     const menuItems = [
         { key: "profile", label: "ข้อมูลส่วนตัว", icon: "fas fa-user" },
         { key: "address", label: "ข้อมูลที่อยู่", icon: "fas fa-map-marker-alt" },
-        // { key: "orders", label: "ติดตามการสั่งซื้อ", icon: "fas fa-box" },
-        // { key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" }
         ...(user?.role === "admin"
-            ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" },]
+            ? [{ key: "addProduct", label: "เพิ่มข้อมูลผลิตภัณฑ์", icon: "fas fa-plus" },
+            { key: "productMangement", label: "จัดการสินค้า", icon: "fas fa-plus" }
+            ]
             : []),
     ];
 
@@ -220,7 +221,7 @@ function ProfilePage({ user, setUser }) {
                         contact_name: formData.contact_name,
                         house_number: formData.house_number,
                         village: formData.village,
-                        lane: formData.lane,       
+                        lane: formData.lane,
                         street: formData.street,
                         district: formData.district,
                         sub_district: formData.sub_district,
@@ -484,6 +485,14 @@ function ProfilePage({ user, setUser }) {
                     </div>
                 );
 
+            case "productMangement":
+                return (
+                    <div>
+                        {/* หน้าเช็คสถานะ*/}
+                        <ProductManagement userId={user.id} />
+                    </div>
+                );
+
 
             default:
                 return null;
@@ -491,7 +500,7 @@ function ProfilePage({ user, setUser }) {
     };
 
     return (
-        <div className="container" style={{ paddingTop: '80px',paddingBottom: '20px' }}>
+        <div style={{ paddingTop: '80px', paddingBottom: '20px' }}> {/*className="container" */}
             <div className="container-fluid mt-4">
                 <div className="row">
                     {/* Sidebar */}

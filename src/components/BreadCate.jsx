@@ -118,40 +118,99 @@ const BreadMenu = () => {
       </p>
 
       <div className="row g-3">
-        {items.map(({ ProductID, ProductName, Price, ShortDescription, ImageURL }) => (
+        {items.map(({ ProductID, ProductName, Price, DiscountPrice, ShortDescription, ImageURL }) => (
           <div key={ProductID} className="col-md-3 mb-4">
             <div className="card h-100 text-center">
-              <div className="image-box mx-auto" style={{ width: 150, height: 150, overflow: "hidden" }}>
-                <img src={ImageURL} alt={ProductName} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              <div
+                className="image-box mx-auto"
+                style={{ width: 150, height: 150, overflow: "hidden" }}
+              >
+                <img
+                  src={ImageURL}
+                  alt={ProductName}
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                />
               </div>
               <div className="card-body text-center">
-                <h5 className="card-title" style={{ fontWeight: 600, fontSize: "1rem" }}>{ProductName}</h5>
-                <p
-                  className="card-price"
-                  style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: "0.3rem" }}
+                <h5
+                  className="card-title"
+                  style={{ fontWeight: 600, fontSize: "1rem" }}
                 >
-                  {Price} ฿
+                  {ProductName}
+                </h5>
+
+                {/* ราคา + ส่วนลด */}
+                <p className="card-price" style={{ marginBottom: "0.3rem" }}>
+                  {DiscountPrice && DiscountPrice < Price ? (
+                    <>
+                      <span
+                        style={{
+                          textDecoration: "line-through",
+                          color: "#999",
+                          fontSize: "1rem",
+                          marginRight: "8px",
+                        }}
+                      >
+                        {Price} ฿
+                      </span>
+                      <span
+                        style={{
+                          fontWeight: 700,
+                          fontSize: "1.3rem",
+                          color: "red",
+                        }}
+                      >
+                        {DiscountPrice} ฿
+                      </span>
+                    </>
+                  ) : (
+                    <span style={{ fontWeight: 700, fontSize: "1.3rem" }}>
+                      {Price} ฿
+                    </span>
+                  )}
                 </p>
-                <p className="card-text" style={{ color: "#555", fontSize: "0.9rem", marginBottom: 16 }}>
+
+                <p
+                  className="card-text"
+                  style={{ color: "#555", fontSize: "0.9rem", marginBottom: 16 }}
+                >
                   <i className="fas fa-weight-hanging me-1"></i> {ShortDescription}
                 </p>
 
                 {/* Input จำนวน */}
                 <div className="d-flex justify-content-center align-items-center mb-2">
-                  <button className="btn btn-sm btn-outline-secondary" onClick={() => handleQuantityChange(ProductID, quantities[ProductID] - 1)}>-</button>
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() =>
+                      handleQuantityChange(ProductID, quantities[ProductID] - 1)
+                    }
+                  >
+                    -
+                  </button>
                   <input
                     type="number"
                     value={quantities[ProductID]}
-                    onChange={e => handleQuantityChange(ProductID, parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleQuantityChange(ProductID, parseInt(e.target.value))
+                    }
                     style={{ width: 50, textAlign: "center", margin: "0 5px" }}
                   />
-                  <button className="btn btn-sm btn-outline-secondary" onClick={() => handleQuantityChange(ProductID, quantities[ProductID] + 1)}>+</button>
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() =>
+                      handleQuantityChange(ProductID, quantities[ProductID] + 1)
+                    }
+                  >
+                    +
+                  </button>
                 </div>
 
                 <button
                   className="btn btn-danger"
                   style={{ borderRadius: 25 }}
-                  onClick={e => handleAddToCart({ ProductID, ProductName, Price, ImageURL }, e)}
+                  onClick={(e) =>
+                    handleAddToCart({ ProductID, ProductName, Price, DiscountPrice, ImageURL }, e)
+                  }
                 >
                   <i className="fas fa-shopping-cart me-2"></i> ใส่ตะกร้า
                 </button>
@@ -160,6 +219,7 @@ const BreadMenu = () => {
           </div>
         ))}
       </div>
+
     </div>
   );
 };

@@ -24,6 +24,7 @@ import CheckoutPage from "./components/checkoutPage";
 import AdminOrders from "./components/adminOrders";
 
 import { CartProvider } from "./components/cartContact";
+import ProductManagement from "./components/productManagement";
 
 function App() {
   const [category, setCategory] = useState("");
@@ -78,6 +79,8 @@ function App() {
               <Route path="/addproduct" element={<AddProduct setUser={setUser} />} />
               <Route path="/checkoutPage" element={<CheckoutPage user={user} setUser={setUser} />} />
               <Route path="/adminOrders" element={<AdminOrders setUser={setUser} />} />
+              <Route path="/productManagement" element={<ProductManagement setUser={setUser} />} />
+
             </Routes>
           </div>
 

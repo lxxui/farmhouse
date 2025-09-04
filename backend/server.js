@@ -193,6 +193,30 @@ app.get('/categories', async (req, res) => {
   }
 });
 
+// ดึงสินค้าทั้งหมด หรือ filter ตาม CategoryID ถ้ามี
+app.get('/products', async (req, res) => {
+  const { categoryId } = req.query;
+
+  try {
+    let query = 'SELECT * FROM products';
+    let params = [];
+
+    if (categoryId) {
+      query += ' WHERE CategoryID = ?';
+      params.push(categoryId);
+    }
+
+    query += ' ORDER BY ProductID ASC';
+
+    const [products] = await pool.query(query, params);
+
+    res.json({ success: true, products });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 
 // ดึงสินค้าตาม CategoryID
 app.get('/products', async (req, res) => {
