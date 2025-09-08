@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import provinces from '../data/provinces.json';
 import districts from '../data/districts.json';
 import subdistricts from '../data/subdistricts.json';
@@ -8,6 +8,11 @@ import ProductManagement from "./productManagement";
 
 import Swal from "sweetalert2";
 import AdminOrders from "./adminOrders";
+
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
 
 function ProfilePage({ user, setUser }) {
     const [activeMenu, setActiveMenu] = useState("profile");
@@ -30,6 +35,36 @@ function ProfilePage({ user, setUser }) {
         province: "",
         postal_code: "",
     });
+
+
+    const mapRef = useRef(null);
+    const customIcon = L.icon({
+        iconUrl: "/path/to/your-icon.png", // เปลี่ยนเป็น path ของรูปจริง
+        iconSize: [35, 45],
+        iconAnchor: [17, 45],
+        popupAnchor: [0, -40],
+        shadowUrl: "/path/to/marker-shadow.png", // ถ้ามี
+        shadowSize: [45, 45],
+    });
+
+    const [address, setAddress] = useState({
+        latitude: 13.7563,   // ค่า default กรุงเทพฯ
+        longitude: 100.5018
+    });
+
+    const [markerPosition, setMarkerPosition] = useState({
+        latitude: formData.latitude || 13.7563,
+        longitude: formData.longitude || 100.5018
+    });
+    function MapClickHandler() {
+        useMapEvents({
+            click(e) {
+                const { lat, lng } = e.latlng;
+                setAddress({ latitude: lat, longitude: lng });
+            },
+        });
+        return null;
+    }
 
 
 
@@ -373,7 +408,6 @@ function ProfilePage({ user, setUser }) {
                                 readOnly={!isEditingAddress}
                             />
                         </div>
-
                         <div className="col-md-6">
                             <label>หมู่บ้าน/คอนโด</label>
                             <input
@@ -406,7 +440,9 @@ function ProfilePage({ user, setUser }) {
                                 disabled={!isEditingAddress}
                             >
                                 <option value="">-- เลือกจังหวัด --</option>
-                                {provinces.map(p => <option key={p.provinceCode} value={p.provinceNameTh}>{p.provinceNameTh}</option>)}
+                                {provinces.map(p => (
+                                    <option key={p.provinceCode} value={p.provinceNameTh}>{p.provinceNameTh}</option>
+                                ))}
                             </select>
                         </div>
                         <div className="col-md-6">
@@ -421,7 +457,9 @@ function ProfilePage({ user, setUser }) {
                                 <option value="">-- เลือกอำเภอ --</option>
                                 {districts
                                     .filter(d => d.provinceCode === selectedProvinceCode)
-                                    .map(d => <option key={d.districtCode} value={d.districtNameTh}>{d.districtNameTh}</option>)}
+                                    .map(d => (
+                                        <option key={d.districtCode} value={d.districtNameTh}>{d.districtNameTh}</option>
+                                    ))}
                             </select>
                         </div>
                         <div className="col-md-6">
@@ -436,7 +474,9 @@ function ProfilePage({ user, setUser }) {
                                 <option value="">-- เลือกตำบล --</option>
                                 {subdistricts
                                     .filter(s => s.districtCode === selectedDistrictCode)
-                                    .map(s => <option key={s.subdistrictCode} value={s.subdistrictNameTh}>{s.subdistrictNameTh}</option>)}
+                                    .map(s => (
+                                        <option key={s.subdistrictCode} value={s.subdistrictNameTh}>{s.subdistrictNameTh}</option>
+                                    ))}
                             </select>
                         </div>
                         <div className="col-md-6">
@@ -450,16 +490,46 @@ function ProfilePage({ user, setUser }) {
                             />
                         </div>
 
-                        <div className="col-12">
+                        {/* Map + Marker */}
+                        <div className="col-12 mt-3">
+                            <label>ปักหมุดพิกัดที่อยู่</label>
+                            <MapContainer center={[address.latitude, address.longitude]} zoom={13} style={{ height: "300px", width: "100%" }}>
+                                <TileLayer
+                                    url={`https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}`}
+                                />
+                                <Marker position={[address.latitude, address.longitude]} draggable={true}
+                                    eventHandlers={{
+                                        dragend: (e) => {
+                                            const { lat, lng } = e.target.getLatLng();
+                                            setAddress({ latitude: lat, longitude: lng });
+                                        }
+                                    }}
+                                />
+                                <MapClickHandler />
+                            </MapContainer>
+
+
+
+
+                            <input
+                                type="text"
+                                className="form-control mt-2"
+                                value={`${address.latitude}, ${address.longitude}`}
+                                readOnly
+                            />
+
+                        </div>
+
+                        <div className="col-12 mt-2">
                             {isEditingAddress ? (
-                                <button className="btn btn-success mt-3" onClick={handleAddressSave}>บันทึก</button>
+                                <button className="btn btn-success" onClick={handleAddressSave}>บันทึก</button>
                             ) : (
-                                <button className="btn btn-primary mt-3" onClick={() => setIsEditingAddress(true)}>แก้ไขข้อมูล</button>
+                                <button className="btn btn-primary" onClick={() => setIsEditingAddress(true)}>แก้ไขข้อมูล</button>
                             )}
                         </div>
                     </div>
-
                 );
+
 
             // case "orders":
             //     return (

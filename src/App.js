@@ -1,6 +1,7 @@
 // src/App.js
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "leaflet/dist/leaflet.css";
 
 import Navbar from "./components/navbar";
 import Promotion from "./components/promotion";

@@ -5,6 +5,29 @@ import { useNavigate } from "react-router-dom";
 import LoginPage from "./loginpage";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+
+
+// component สำหรับคลิกปักหมุด
+function LocationMarker({ address, setAddress }) {
+  const map = useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+      setAddress({
+        ...address,
+        latitude: lat,
+        longitude: lng,
+      });
+    },
+  });
+
+  return address?.latitude && address?.longitude ? (
+    <Marker position={[address.latitude, address.longitude]}>
+      <Popup>📍 ตำแหน่งที่เลือก</Popup>
+    </Marker>
+  ) : null;
+}
 
 const CheckoutPage = ({ user, setUser }) => {
   const { cartItems, clearCart } = useContext(CartContext);
@@ -72,13 +95,27 @@ const CheckoutPage = ({ user, setUser }) => {
       return;
     }
 
-    const addressString = `${address.house_number} ${address.village} ${address.lane ? ' ซอย' + address.lane : ''} ${address.street}, ${address.sub_district}, ${address.district}, ${address.province} ${address.postal_code}`;
+    // ✅ เช็คว่ามีพิกัดแล้วหรือยัง
+    if (!address.latitude || !address.longitude) {
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณาเลือกพิกัด",
+        text: "โปรดกดปุ่ม 'ใช้ตำแหน่งปัจจุบัน' ก่อนยืนยันการสั่งซื้อ",
+      });
+      return;
+    }
+
+    const addressString = `${address.house_number} ${address.village} ${address.lane ? " ซอย" + address.lane : ""
+      } ${address.street}, ${address.sub_district}, ${address.district}, ${address.province
+      } ${address.postal_code}`;
 
     const orderData = {
       user_id: user.id,
       contact_name: user.username || address.contact_name,
       phone: address.phone,
       address: addressString,
+      latitude: address.latitude,   // ⭐️ เพิ่ม
+      longitude: address.longitude, // ⭐️ เพิ่ม
       payment_method: payment,
       total_price: totalPrice >= 100 ? totalPrice : totalPrice + 20,
       items: cartItems.map((item) => ({
@@ -105,15 +142,16 @@ const CheckoutPage = ({ user, setUser }) => {
           icon: "success",
           title: "สั่งซื้อสำเร็จ",
           html: `<p>ชื่อผู้สั่ง: ${orderData.contact_name}</p>
-               <p>เบอร์โทร: ${orderData.phone}</p>
-               <p>ที่อยู่: ${orderData.address}</p>
-               <p>วิธีชำระ: ${payment === "cod"
+             <p>เบอร์โทร: ${orderData.phone}</p>
+             <p>ที่อยู่: ${orderData.address}</p>
+             <p>พิกัด: ${orderData.latitude}, ${orderData.longitude}</p> <!-- ⭐️ แสดงพิกัด -->
+             <p>วิธีชำระ: ${payment === "cod"
               ? "💵 ชำระเงินปลายทาง"
               : payment === "bank"
                 ? "🏦 โอนผ่านบัญชีธนาคาร (QR Code)"
                 : "💳 บัตรเครดิต / เดบิต"
             }</p>
-               <p>ยอดรวม: ${orderData.total_price} ฿</p>`,
+             <p>ยอดรวม: ${orderData.total_price} ฿</p>`,
           timer: 3000,
           showConfirmButton: true,
         });
@@ -138,8 +176,9 @@ const CheckoutPage = ({ user, setUser }) => {
   };
 
 
+
   return (
-        <div className="container" style={{ paddingTop: '80px',paddingBottom: '20px' }}>
+    <div className="container" style={{ paddingTop: '80px', paddingBottom: '20px' }}>
       <h3 className="mb-4 text-danger">ชำระเงิน</h3>
       <div className="row">
         {/* ซ้าย: ข้อมูลผู้สั่ง + ที่อยู่ */}
@@ -180,6 +219,37 @@ const CheckoutPage = ({ user, setUser }) => {
                   readOnly
                 />
               </div>
+              {/* พิกัดจัดส่ง */}
+              <div className="mb-3">
+                <label className="form-label">ปักหมุดที่อยู่จัดส่ง</label>
+                <MapContainer
+                  center={[
+                    address?.latitude || 13.7563,
+                    address?.longitude || 100.5018
+                  ]}
+                  zoom={13}
+                  style={{ height: "300px", width: "100%" }}
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <LocationMarker address={address} setAddress={setAddress} />
+                </MapContainer>
+
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={
+                      address?.latitude && address?.longitude
+                        ? `${address.latitude}, ${address.longitude}`
+                        : "ยังไม่ได้ปักหมุด"
+                    }
+                    readOnly
+                  />
+                </div>
+              </div>
+
+
+
             </div>
           </div>
 
