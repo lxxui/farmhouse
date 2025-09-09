@@ -157,20 +157,20 @@ app.get("/user/:id", async (req, res) => {
 // อัปเดต/เพิ่มข้อมูล address
 app.put("/user/:id/address", async (req, res) => {
   const { id } = req.params;
-  const { contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone } = req.body;
+  const { contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone, latitude, longitude } = req.body;
 
   console.log("PUT /user/:id/address hit", id, req.body);
 
   try {
     await pool.query(
       `INSERT INTO address 
-    (user_id, contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone) 
-   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-   ON DUPLICATE KEY UPDATE 
-     contact_name=?, house_number=?, village=?, lane=?, street=?, sub_district=?, district=?, province=?, postal_code=?, phone=?`,
+        (user_id, contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone, latitude, longitude) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE 
+        contact_name=?, house_number=?, village=?, lane=?, street=?, sub_district=?, district=?, province=?, postal_code=?, phone=?, latitude=?, longitude=?`,
       [
-        id, contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone,
-        contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone
+        id, contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone, latitude, longitude,
+        contact_name, house_number, village, lane, street, sub_district, district, province, postal_code, phone, latitude, longitude
       ]
     );
 
@@ -180,6 +180,7 @@ app.put("/user/:id/address", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 
 // ดึง category ทั้งหมด

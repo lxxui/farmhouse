@@ -38,13 +38,12 @@ function ProfilePage({ user, setUser }) {
 
 
     const mapRef = useRef(null);
-    const customIcon = L.icon({
-        iconUrl: "/path/to/your-icon.png", // เปลี่ยนเป็น path ของรูปจริง
-        iconSize: [35, 45],
-        iconAnchor: [17, 45],
-        popupAnchor: [0, -40],
-        shadowUrl: "/path/to/marker-shadow.png", // ถ้ามี
-        shadowSize: [45, 45],
+    // custom icon แบบ divIcon ใช้ Font Awesome
+    const customIcon = L.divIcon({
+        html: `<i class="fas fa-map-marker-alt" style="color: red; font-size: 30px;"></i>`,
+        iconSize: [30, 30],        // ขนาดกล่อง icon
+        iconAnchor: [15, 30],      // จุดยึดกับพิกัด (ตรงปลายหมุด)
+        className: "my-custom-icon" // ป้องกัน default leaflet styles
     });
 
     const [address, setAddress] = useState({
@@ -117,9 +116,18 @@ function ProfilePage({ user, setUser }) {
                         province: data.address.province || "",
                         district: data.address.district || "",
                         sub_district: data.address.sub_district || "",
+                        
                         postal_code: data.address.postal_code || "",
                         phone: data.address.phone || "",
                     }));
+
+                    // ✅ อัปเดตตำแหน่งแผนที่ด้วย latitude/longitude จาก DB
+                    if (data.address.latitude && data.address.longitude) {
+                        setAddress({
+                            latitude: data.address.latitude,
+                            longitude: data.address.longitude
+                        });
+                    }
 
                     const province = provinces.find(p => p.provinceNameTh === data.address.province);
                     setSelectedProvinceCode(province?.provinceCode || "");
@@ -235,14 +243,17 @@ function ProfilePage({ user, setUser }) {
                     contact_name: formData.contact_name,
                     house_number: formData.house_number,
                     village: formData.village,
-                    lane: formData.lane,          // ✅ เพิ่มตรงนี้
+                    lane: formData.lane,
                     street: formData.street,
                     district: formData.district,
                     sub_district: formData.sub_district,
                     province: formData.province,
                     postal_code: formData.postal_code,
-                    phone: formData.phone
+                    phone: formData.phone,
+                    latitude: address.latitude,    // ✅ เพิ่ม latitude
+                    longitude: address.longitude   // ✅ เพิ่ม longitude
                 }),
+
             });
 
             const data = await response.json();
@@ -262,7 +273,9 @@ function ProfilePage({ user, setUser }) {
                         sub_district: formData.sub_district,
                         province: formData.province,
                         postal_code: formData.postal_code,
-                        phone: formData.phone
+                        phone: formData.phone,
+                        latitude: address.latitude,    // ✅
+                        longitude: address.longitude   // ✅
                     }
                 };
                 // อัปเดต state
@@ -315,7 +328,9 @@ function ProfilePage({ user, setUser }) {
                         username: data.user.username || "",
                         email: data.user.email || "",
                         phone: data.user.phone || "",
-                        role: data.user.role // ✅ เพิ่มตรงนี้
+                        role: data.user.role || "",
+                        latitude: data.user.latitude || "",
+                        longitude: data.user.longitude
 
                     }));
                 }
@@ -493,23 +508,31 @@ function ProfilePage({ user, setUser }) {
                         {/* Map + Marker */}
                         <div className="col-12 mt-3">
                             <label>ปักหมุดพิกัดที่อยู่</label>
-                            <MapContainer center={[address.latitude, address.longitude]} zoom={13} style={{ height: "300px", width: "100%" }}>
-                                <TileLayer
-                                    url={`https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}`}
-                                />
-                                <Marker position={[address.latitude, address.longitude]} draggable={true}
+                            <MapContainer
+                                center={[address.latitude, address.longitude]}
+                                zoom={13}
+                                style={{ height: "300px", width: "100%" }}
+                            >
+                                <TileLayer url={`https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}`} />
+
+                                <Marker
+                                    position={[address.latitude, address.longitude]}
+                                    icon={customIcon}
+
+                                    draggable={isEditingAddress}
                                     eventHandlers={{
                                         dragend: (e) => {
+                                            if (!isEditingAddress) return;
                                             const { lat, lng } = e.target.getLatLng();
                                             setAddress({ latitude: lat, longitude: lng });
-                                        }
+                                        },
                                     }}
                                 />
-                                <MapClickHandler />
+
+
+                                {/* MapClickHandler ทำงานเฉพาะตอนแก้ไข */}
+                                {isEditingAddress && <MapClickHandler />}
                             </MapContainer>
-
-
-
 
                             <input
                                 type="text"
@@ -517,7 +540,6 @@ function ProfilePage({ user, setUser }) {
                                 value={`${address.latitude}, ${address.longitude}`}
                                 readOnly
                             />
-
                         </div>
 
                         <div className="col-12 mt-2">
@@ -527,6 +549,7 @@ function ProfilePage({ user, setUser }) {
                                 <button className="btn btn-primary" onClick={() => setIsEditingAddress(true)}>แก้ไขข้อมูล</button>
                             )}
                         </div>
+
                     </div>
                 );
 
