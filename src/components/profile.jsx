@@ -8,11 +8,9 @@ import ProductManagement from "./productManagement";
 
 import Swal from "sweetalert2";
 import AdminOrders from "./adminOrders";
-
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-
 
 function ProfilePage({ user, setUser }) {
     const [activeMenu, setActiveMenu] = useState("profile");
@@ -46,11 +44,6 @@ function ProfilePage({ user, setUser }) {
         className: "my-custom-icon" // ป้องกัน default leaflet styles
     });
 
-    const [address, setAddress] = useState({
-        latitude: 13.7563,   // ค่า default กรุงเทพฯ
-        longitude: 100.5018
-    });
-
     const [markerPosition, setMarkerPosition] = useState({
         latitude: formData.latitude || 13.7563,
         longitude: formData.longitude || 100.5018
@@ -64,6 +57,78 @@ function ProfilePage({ user, setUser }) {
         });
         return null;
     }
+
+
+    // โหลดข้อมูล DC จาก API
+    useEffect(() => {
+        fetch("http://localhost:3001/api/branches") // endpoint ของคุณ
+            .then(res => res.json())
+            .then(data => setBranches(data))
+            .catch(err => console.error(err));
+    }, []);
+
+    // บ้าน user
+    const [address, setAddress] = useState({ latitude: 13.7563, longitude: 100.5018 });
+    // สาขา DC
+    const [branches, setBranches] = useState([]);
+    const [nearestBranch, setNearestBranch] = useState(null);
+
+    // custom icon บ้าน
+    const homeIcon = L.divIcon({
+        html: `<i class="fas fa-map-marker-alt" style="color: red; font-size: 30px;"></i>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        className: "home-icon"
+    });
+
+    // custom icon DC
+    const dcIcon = L.icon({
+        iconUrl: '/images/dc-logo.png', // ใส่ path ของรูปภาพของคุณ
+        iconSize: [30, 30],             // ขนาดของรูป
+        iconAnchor: [15, 30],           // จุดยึดกับพิกัด (ตรงปลายหมุด)
+        popupAnchor: [0, -30],          // จุดที่เปิด popup ถ้ามี
+    });
+
+
+    // ฟังก์ชันคำนวณระยะทาง
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        const R = 6371; // km
+        const toRad = deg => deg * Math.PI / 180;
+
+        const dLat = toRad(lat2 - lat1);
+        const dLon = toRad(lon2 - lon1);
+        const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+
+
+    useEffect(() => {
+        if (branches.length === 0) return;
+
+        const nearest = branches
+            .filter(dc => dc.latitude_address && dc.longitude_address)
+            .map(dc => ({
+                ...dc,
+                distance: getDistanceFromLatLonInKm(
+                    address.latitude,
+                    address.longitude,
+                    dc.latitude_address,
+                    dc.longitude_address
+                )
+            }))
+            .sort((a, b) => a.distance - b.distance)[0];
+
+        setNearestBranch(nearest);
+        console.log("branches:", branches);
+        console.log("nearest:", nearest); // ✅ ค่านี้ถูกต้อง
+
+    }, [address, branches]);
+
 
 
 
@@ -116,7 +181,7 @@ function ProfilePage({ user, setUser }) {
                         province: data.address.province || "",
                         district: data.address.district || "",
                         sub_district: data.address.sub_district || "",
-                        
+
                         postal_code: data.address.postal_code || "",
                         phone: data.address.phone || "",
                     }));
@@ -515,31 +580,52 @@ function ProfilePage({ user, setUser }) {
                             >
                                 <TileLayer url={`https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}`} />
 
+                                {/* Marker บ้าน */}
                                 <Marker
                                     position={[address.latitude, address.longitude]}
-                                    icon={customIcon}
-
                                     draggable={isEditingAddress}
+                                    icon={homeIcon}
                                     eventHandlers={{
                                         dragend: (e) => {
-                                            if (!isEditingAddress) return;
                                             const { lat, lng } = e.target.getLatLng();
                                             setAddress({ latitude: lat, longitude: lng });
                                         },
                                     }}
                                 />
 
+                                {/* Marker DC */}
+                                {branches.map(dc => (
+                                    dc.latitude_address && dc.longitude_address && (
+                                        <Marker
+                                            key={dc.DC}
+                                            position={[dc.latitude_address, dc.longitude_address]}
+                                            icon={dcIcon}
+                                        />
+                                    )
+                                ))}
 
-                                {/* MapClickHandler ทำงานเฉพาะตอนแก้ไข */}
                                 {isEditingAddress && <MapClickHandler />}
                             </MapContainer>
 
+                            {/* พิกัดบ้าน */}
                             <input
                                 type="text"
                                 className="form-control mt-2"
                                 value={`${address.latitude}, ${address.longitude}`}
                                 readOnly
                             />
+
+                            {/* ระยะทาง */}
+                            <div className="mt-3">
+                                <h2>ระยะทางจากบ้านไปแต่ละสาขา</h2>
+                                {nearestBranch ? (
+                                    <p>
+                                        สาขาที่ใกล้ที่สุด: {nearestBranch.DC_TH} ({nearestBranch.distance.toFixed(2)} กม.)
+                                    </p>
+                                ) : (
+                                    <p>กำลังโหลดข้อมูลสาขา...</p>
+                                )}
+                            </div>
                         </div>
 
                         <div className="col-12 mt-2">

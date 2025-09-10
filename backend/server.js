@@ -448,6 +448,23 @@ app.put("/orders/:id/cancel", async (req, res) => {
 });
 
 
+// get dc latitude longtitude
+// ตัวอย่าง Node.js + Express
+app.get("/api/branches", async (req, res) => {
+  try {
+    // connect pool
+    let pool = await sql.connect(dbConfig);
+
+    // query ข้อมูลจาก table dc
+    let result = await pool.request().query("SELECT DC, DC_TH, latitude, longitude FROM dc");
+
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err.message);
+  }
+});
 
 
 

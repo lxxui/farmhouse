@@ -1,11 +1,12 @@
 import React from "react";
 
 const images = [
-  { src: "/image/to_tone.jpg", alt: "img_pro1" },
-  { src: "/image/dora.jpg", alt: "img_pro2" },
-  { src: "/image/mario.jpg", alt: "img_pro3" },
-  { src: "/image/pang_pea.jpg", alt: "img_pro4" },
-  { src: "/image/dora.jpg", alt: "img_pro5" },
+  { src: "/image/promotion_agust.jpg", alt: "img_pro1" },
+  { src: "/image/promotion1_agust.jpg", alt: "img_pro2" },
+  { src: "/image/promotion2_agust.jpg", alt: "img_pro3" },
+  { src: "/image/promotion3_agust.jpg", alt: "img_pro4" },
+  { src: "/image/promotion4_agust.jpg", alt: "img_pro5" },
+  { src: "/image/promotion5_agust.jpg", alt: "img_pro5" },
 ];
 
 const Carousel = () => {
