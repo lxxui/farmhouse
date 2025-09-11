@@ -6,37 +6,102 @@ import LoginPage from "./loginpage";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+// บ้าน user marker icon
+const homeIcon = L.divIcon({
+  html: `<i class="fas fa-map-marker-alt" style="color: red; font-size: 30px;"></i>`,
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  className: "home-icon",
+});
 
-// component สำหรับคลิกปักหมุด
-function LocationMarker({ address, setAddress }) {
+// DC branch marker icon
+
+const dcIcon = L.icon({
+  iconUrl: '/image/logo_top.png', // ✅ ต้องมีไฟล์นี้อยู่ใน public/image/
+  iconSize: [40, 15],
+  iconAnchor: [15, 30],
+  popupAnchor: [0, -30],
+});
+
+// Component สำหรับคลิกปักหมุดบ้าน
+function LocationMarker({ address }) {
+  // map click ใช้เลือกครั้งแรก
   const map = useMapEvents({
     click(e) {
-      const { lat, lng } = e.latlng;
-      setAddress({
-        ...address,
-        latitude: lat,
-        longitude: lng,
-      });
+      if (!address?.latitude || !address?.longitude) {
+        const { lat, lng } = e.latlng;
+        address.setAddress({ latitude: lat, longitude: lng });
+      }
     },
   });
 
   return address?.latitude && address?.longitude ? (
-    <Marker position={[address.latitude, address.longitude]}>
-      <Popup>📍 ตำแหน่งที่เลือก</Popup>
+    <Marker position={[address.latitude, address.longitude]} icon={homeIcon}>
+      <Popup>
+        📍 คุณปักหมุดตรงนี้
+        <br />
+        พิกัด: {address.latitude.toFixed(6)}, {address.longitude.toFixed(6)}
+      </Popup>
     </Marker>
   ) : null;
-}
+};
 
 const CheckoutPage = ({ user, setUser }) => {
   const { cartItems, clearCart } = useContext(CartContext);
   const navigate = useNavigate();
   const [payment, setPayment] = useState("cod");
   const [address, setAddress] = useState(null);
+  const [branches, setBranches] = useState([]);
+  const [nearestBranch, setNearestBranch] = useState(null);
   const [slipFile, setSlipFile] = useState(null);
 
-  // เช็คว่า user login หรือไม่
+  // fetch DC branches
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const res = await fetch("http://localhost:3001/api/branches");
+        const data = await res.json();
+        if (Array.isArray(data)) setBranches(data);
+      } catch (err) {
+        console.error("Fetch branches error:", err);
+      }
+    };
+    fetchBranches();
+  }, []);
+
+  // คำนวณ nearest branch
+  const getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const toRad = deg => deg * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  useEffect(() => {
+    if (!address || branches.length === 0) return;
+    const candidates = branches
+      .filter(dc => dc.latitude_address && dc.longitude_address)
+      .map(dc => {
+        const lat = parseFloat(dc.latitude_address);
+        const lon = parseFloat(dc.longitude_address);
+        if (isNaN(lat) || isNaN(lon)) return null;
+        return {
+          ...dc,
+          distance: getDistanceFromLatLonInKm(address.latitude, address.longitude, lat, lon)
+        };
+      })
+      .filter(Boolean);
+
+    setNearestBranch(candidates.sort((a, b) => a.distance - b.distance)[0]);
+  }, [address, branches]);
+
+  // เช็ค login
   useEffect(() => {
     if (!user) {
       Swal.fire({
@@ -44,20 +109,17 @@ const CheckoutPage = ({ user, setUser }) => {
         didOpen: () => {
           const container = document.getElementById("login-popup");
           const root = createRoot(container);
-          root.render(
-            <LoginPage setUser={setUser} onClose={() => Swal.close()} />
-          );
+          root.render(<LoginPage setUser={setUser} onClose={() => Swal.close()} />);
         },
         showConfirmButton: false,
       });
     }
   }, [user]);
 
-  // fetch user address ถ้า user.address ไม่มี
+  // fetch user address
   useEffect(() => {
     const fetchAddress = async () => {
       if (!user?.id) return;
-
       try {
         const res = await fetch(`http://localhost:3001/user/${user.id}/address`);
         const data = await res.json();
@@ -66,7 +128,6 @@ const CheckoutPage = ({ user, setUser }) => {
         console.error("Fetch address error:", err);
       }
     };
-
     if (!user?.address) fetchAddress();
     else setAddress(user.address);
   }, [user]);
@@ -85,37 +146,24 @@ const CheckoutPage = ({ user, setUser }) => {
   const totalPrice = cartItems.reduce((sum, item) => sum + item.Price * item.quantity, 0);
 
   const handleSubmit = async () => {
-    if (!address) {
-      Swal.fire({
-        icon: "warning",
-        title: "กรุณากรอกที่อยู่จัดส่ง",
-        text: "ไปหน้าโปรไฟล์เพื่อกรอกที่อยู่ก่อน",
-      });
-      navigate("/profile");
-      return;
-    }
-
-    // ✅ เช็คว่ามีพิกัดแล้วหรือยัง
-    if (!address.latitude || !address.longitude) {
+    if (!address?.latitude || !address?.longitude) {
       Swal.fire({
         icon: "warning",
         title: "กรุณาเลือกพิกัด",
-        text: "โปรดกดปุ่ม 'ใช้ตำแหน่งปัจจุบัน' ก่อนยืนยันการสั่งซื้อ",
+        text: "โปรดกดปุ่ม 'ใช้ตำแหน่งปัจจุบัน' หรือปักหมุดบ้านก่อนยืนยัน",
       });
       return;
     }
 
-    const addressString = `${address.house_number} ${address.village} ${address.lane ? " ซอย" + address.lane : ""
-      } ${address.street}, ${address.sub_district}, ${address.district}, ${address.province
-      } ${address.postal_code}`;
+    const addressString = `${address.house_number} ${address.village} ${address.lane ? " ซอย" + address.lane : ""} ${address.street}, ${address.sub_district}, ${address.district}, ${address.province} ${address.postal_code}`;
 
     const orderData = {
       user_id: user.id,
       contact_name: user.username || address.contact_name,
       phone: address.phone,
       address: addressString,
-      latitude: address.latitude,   // ⭐️ เพิ่ม
-      longitude: address.longitude, // ⭐️ เพิ่ม
+      latitude: address.latitude,
+      longitude: address.longitude,
       payment_method: payment,
       total_price: totalPrice >= 100 ? totalPrice : totalPrice + 20,
       items: cartItems.map((item) => ({
@@ -129,109 +177,87 @@ const CheckoutPage = ({ user, setUser }) => {
     try {
       const res = await fetch("http://localhost:3001/orders", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       });
-
       const data = await res.json();
-
       if (data.success) {
         Swal.fire({
           icon: "success",
           title: "สั่งซื้อสำเร็จ",
           html: `<p>ชื่อผู้สั่ง: ${orderData.contact_name}</p>
-             <p>เบอร์โทร: ${orderData.phone}</p>
-             <p>ที่อยู่: ${orderData.address}</p>
-             <p>พิกัด: ${orderData.latitude}, ${orderData.longitude}</p> <!-- ⭐️ แสดงพิกัด -->
-             <p>วิธีชำระ: ${payment === "cod"
-              ? "💵 ชำระเงินปลายทาง"
-              : payment === "bank"
-                ? "🏦 โอนผ่านบัญชีธนาคาร (QR Code)"
-                : "💳 บัตรเครดิต / เดบิต"
-            }</p>
-             <p>ยอดรวม: ${orderData.total_price} ฿</p>`,
+                 <p>เบอร์โทร: ${orderData.phone}</p>
+                 <p>ที่อยู่: ${orderData.address}</p>
+                 <p>พิกัด: ${orderData.latitude}, ${orderData.longitude}</p>
+                 <p>วิธีชำระ: ${payment === "cod" ? "💵 ชำระเงินปลายทาง" : payment === "bank" ? "🏦 โอนผ่านบัญชีธนาคาร (QR Code)" : "💳 บัตรเครดิต / เดบิต"}</p>
+                 <p>ยอดรวม: ${orderData.total_price} ฿</p>`,
           timer: 3000,
           showConfirmButton: true,
         });
-
         clearCart();
         navigate("/");
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "เกิดข้อผิดพลาด",
-          text: data.message || "ไม่สามารถบันทึกคำสั่งซื้อได้",
-        });
+        Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: data.message || "ไม่สามารถบันทึกคำสั่งซื้อได้" });
       }
     } catch (err) {
       console.error(err);
-      Swal.fire({
-        icon: "error",
-        title: "เกิดข้อผิดพลาด",
-        text: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์",
-      });
+      Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์" });
     }
   };
 
-
-
   return (
-    <div className="container" style={{ paddingTop: '80px', paddingBottom: '20px' }}>
+    <div className="container" style={{ paddingTop: "80px", paddingBottom: "20px" }}>
       <h3 className="mb-4 text-danger">ชำระเงิน</h3>
       <div className="row">
         {/* ซ้าย: ข้อมูลผู้สั่ง + ที่อยู่ */}
         <div className="col-lg-7 mb-4">
           <div className="card shadow-sm mb-3">
-            <div className="card-header bg-white">
-              <strong>ข้อมูลผู้สั่งซื้อ</strong>
-            </div>
+            <div className="card-header bg-white"><strong>ข้อมูลผู้สั่งซื้อ</strong></div>
             <div className="card-body">
+              {/* ข้อมูลผู้สั่ง */}
               <div className="mb-2">
                 <label className="form-label">ชื่อผู้สั่ง</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={user.username || address?.contact_name || ""}
-                  readOnly
-                />
+                <input type="text" className="form-control" value={user.username || address?.contact_name || ""} readOnly />
               </div>
               <div className="mb-2">
                 <label className="form-label">เบอร์โทร</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={address?.phone || ""}
-                  readOnly
-                />
+                <input type="text" className="form-control" value={address?.phone || ""} readOnly />
               </div>
               <div className="mb-2">
                 <label className="form-label">ที่อยู่จัดส่ง</label>
                 <textarea
                   className="form-control"
                   rows="3"
-                  value={
-                    address
-                      ? `${address.house_number} ${address.village} ${address.lane ? ' ซอย' + address.lane : ''} ${address.street}, ${address.sub_district}, ${address.district}, ${address.province} ${address.postal_code}`
-                      : "ยังไม่ได้กรอกที่อยู่"
-                  }
+                  value={address ? `${address.house_number} ${address.village} ${address.lane ? ' ซอย' + address.lane : ''} ${address.street}, ${address.sub_district}, ${address.district}, ${address.province} ${address.postal_code}` : "ยังไม่ได้กรอกที่อยู่"}
                   readOnly
                 />
               </div>
-              {/* พิกัดจัดส่ง */}
+
+              {/* Map */}
               <div className="mb-3">
                 <label className="form-label">ปักหมุดที่อยู่จัดส่ง</label>
                 <MapContainer
-                  center={[
-                    address?.latitude || 13.7563,
-                    address?.longitude || 100.5018
-                  ]}
+                  center={[address?.latitude || 13.7563, address?.longitude || 100.5018]}
                   zoom={13}
                   style={{ height: "300px", width: "100%" }}
                 >
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                   <LocationMarker address={address} setAddress={setAddress} />
+
+                  {/* แสดง DC branches */}
+                  {branches.map((dc) => (
+                    dc.latitude_address && dc.longitude_address && (
+                      <Marker position={[address.latitude, address.longitude]} icon={homeIcon}>
+                        <Popup>
+                          📍 คุณปักหมุดตรงนี้
+                          <br />
+                          พิกัด: {address.latitude.toFixed(6)}, {address.longitude.toFixed(6)}
+                          {nearestBranch ? <><br />🏬 สาขาใกล้บ้าน: {nearestBranch.DC_TH}</> : null}
+                        </Popup>
+                      </Marker>
+                    )
+                  ))}
+
                 </MapContainer>
 
                 <div className="mt-2">
@@ -240,16 +266,14 @@ const CheckoutPage = ({ user, setUser }) => {
                     className="form-control"
                     value={
                       address?.latitude && address?.longitude
-                        ? `${address.latitude}, ${address.longitude}`
+                        ? `พิกัดบ้าน: ${address.latitude.toFixed(6)}, ${address.longitude.toFixed(6)}${nearestBranch ? ` | สาขาใกล้ที่สุด: ${nearestBranch.DC_TH}` : ""
+                        }`
                         : "ยังไม่ได้ปักหมุด"
                     }
                     readOnly
                   />
                 </div>
               </div>
-
-
-
             </div>
           </div>
 
@@ -333,6 +357,7 @@ const CheckoutPage = ({ user, setUser }) => {
               )}
             </div>
           </div>
+
         </div>
 
         {/* ขวา: สรุปรายการสินค้า */}
@@ -410,6 +435,7 @@ const CheckoutPage = ({ user, setUser }) => {
           </button>
         </div>
       </div>
+      <button className="btn btn-danger w-100" onClick={handleSubmit}>ยืนยันการสั่งซื้อ</button>
     </div>
   );
 };

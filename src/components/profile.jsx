@@ -8,7 +8,7 @@ import ProductManagement from "./productManagement";
 
 import Swal from "sweetalert2";
 import AdminOrders from "./adminOrders";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents , Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -59,18 +59,36 @@ function ProfilePage({ user, setUser }) {
     }
 
 
-    // โหลดข้อมูล DC จาก API
+    /* dc */
+    const [branches, setBranches] = useState([]);
+
     useEffect(() => {
         fetch("http://localhost:3001/api/branches") // endpoint ของคุณ
             .then(res => res.json())
-            .then(data => setBranches(data))
-            .catch(err => console.error(err));
+            .then(data => {
+                if (Array.isArray(data)) {
+                    // ✅ ถ้า data เป็น array
+                    setBranches(
+                        data.map(dc => ({
+                            ...dc,
+                            latitude_address: parseFloat(dc.latitude_address),
+                            longitude_address: parseFloat(dc.longitude_address)
+                        }))
+                    );
+                } else {
+                    console.error("API error:", data);
+                    setBranches([]);
+                }
+            })
+            .catch(err => {
+                console.error("Fetch error:", err);
+                setBranches([]);
+            });
     }, []);
 
     // บ้าน user
     const [address, setAddress] = useState({ latitude: 13.7563, longitude: 100.5018 });
     // สาขา DC
-    const [branches, setBranches] = useState([]);
     const [nearestBranch, setNearestBranch] = useState(null);
 
     // custom icon บ้าน
@@ -81,13 +99,13 @@ function ProfilePage({ user, setUser }) {
         className: "home-icon"
     });
 
-    // custom icon DC
     const dcIcon = L.icon({
-        iconUrl: '/images/dc-logo.png', // ใส่ path ของรูปภาพของคุณ
-        iconSize: [30, 30],             // ขนาดของรูป
-        iconAnchor: [15, 30],           // จุดยึดกับพิกัด (ตรงปลายหมุด)
-        popupAnchor: [0, -30],          // จุดที่เปิด popup ถ้ามี
+        iconUrl: '/image/logo_top.png', // ✅ ต้องมีไฟล์นี้อยู่ใน public/image/
+        iconSize: [40, 15],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30],
     });
+
 
 
     // ฟังก์ชันคำนวณระยะทาง
@@ -110,24 +128,27 @@ function ProfilePage({ user, setUser }) {
     useEffect(() => {
         if (branches.length === 0) return;
 
-        const nearest = branches
+        const candidates = branches
             .filter(dc => dc.latitude_address && dc.longitude_address)
-            .map(dc => ({
-                ...dc,
-                distance: getDistanceFromLatLonInKm(
-                    address.latitude,
-                    address.longitude,
-                    dc.latitude_address,
-                    dc.longitude_address
-                )
-            }))
-            .sort((a, b) => a.distance - b.distance)[0];
+            .map(dc => {
+                const lat = parseFloat(dc.latitude_address);
+                const lon = parseFloat(dc.longitude_address);
+                if (isNaN(lat) || isNaN(lon)) return null;
+
+                return {
+                    ...dc,
+                    distance: getDistanceFromLatLonInKm(address.latitude, address.longitude, lat, lon),
+                    latitude_address: lat, // ✅ update ให้เป็น number
+                    longitude_address: lon // ✅ update ให้เป็น number
+                };
+            })
+            .filter(Boolean);
+
+        const nearest = candidates.sort((a, b) => a.distance - b.distance)[0];
+        console.log("Nearest branch:", nearest); // 🔍 ต้องเห็น object พร้อม distance
 
         setNearestBranch(nearest);
-        console.log("branches:", branches);
-        console.log("nearest:", nearest); // ✅ ค่านี้ถูกต้อง
-
-    }, [address, branches]);
+    }, [address.latitude, address.longitude, branches.length]);
 
 
 
@@ -598,11 +619,19 @@ function ProfilePage({ user, setUser }) {
                                     dc.latitude_address && dc.longitude_address && (
                                         <Marker
                                             key={dc.DC}
-                                            position={[dc.latitude_address, dc.longitude_address]}
+                                            position={[parseFloat(dc.latitude_address), parseFloat(dc.longitude_address)]}
                                             icon={dcIcon}
-                                        />
+                                        >
+                                            {/* Popup เมื่อคลิก Marker */}
+                                            <Popup>
+                                                <strong>สาขา:</strong> {dc.DC_TH} <br />
+                                                {dc.DC}
+                                            </Popup>
+                                        </Marker>
                                     )
                                 ))}
+
+
 
                                 {isEditingAddress && <MapClickHandler />}
                             </MapContainer>

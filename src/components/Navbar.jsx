@@ -15,6 +15,7 @@ const Navbar = ({ user, setUser, setFormData }) => {
     const [showPopup, setShowPopup] = useState(false); // ควบคุมแสดง/ซ่อน modal
     const { cartItems } = useContext(CartContext);
     const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0); // รวมจำนวนสินค้า
+    const location = useLocation(); // ✅ ใช้ hook แทน global location
 
     // ฟังก์ชัน logout
     const handleLogout = () => {
@@ -135,6 +136,32 @@ const Navbar = ({ user, setUser, setFormData }) => {
             navigate("/checkStatus");
         }
     };
+
+
+    useEffect(() => {
+        const isExcludedPage = location.pathname.includes("/cart") || location.pathname.includes("/checkoutPage");
+
+        if (cartCount > 0 && !isExcludedPage) {
+            const timer = setTimeout(() => {
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: "info",
+                    title: `คุณมีสินค้า ${cartCount} ชิ้นในตะกร้า ไปชำระเงินกัน!`,
+                    showConfirmButton: true,
+                    confirmButtonText: "ไปชำระเงิน",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        navigate("/checkoutPage", {
+                            state: { user, address, cartItems }, // ✅ ใช้ address ที่ props ส่งมา
+                        });
+                    }
+                });
+            }, 300000); // 5 นาที
+
+            return () => clearTimeout(timer);
+        }
+    }, [cartCount, location.pathname, navigate, user, address, cartItems]);
 
 
 
