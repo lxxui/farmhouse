@@ -27,14 +27,11 @@ const dcIcon = L.icon({
 });
 
 // Component สำหรับคลิกปักหมุดบ้าน
-function LocationMarker({ address }) {
-  // map click ใช้เลือกครั้งแรก
-  const map = useMapEvents({
+function LocationMarker({ address, setAddress }) {
+  useMapEvents({
     click(e) {
-      if (!address?.latitude || !address?.longitude) {
-        const { lat, lng } = e.latlng;
-        address.setAddress({ latitude: lat, longitude: lng });
-      }
+      const { lat, lng } = e.latlng;
+      setAddress({ ...address, latitude: lat, longitude: lng });
     },
   });
 
@@ -247,29 +244,25 @@ const CheckoutPage = ({ user, setUser }) => {
                   {/* แสดง DC branches */}
                   {branches.map((dc) => (
                     dc.latitude_address && dc.longitude_address && (
-                      <Marker position={[address.latitude, address.longitude]} icon={homeIcon}>
+                      <Marker
+                        key={dc.dc}
+                        position={[parseFloat(dc.latitude_address), parseFloat(dc.longitude_address)]}
+                        icon={dcIcon}
+                      >
                         <Popup>
-                          📍 คุณปักหมุดตรงนี้
-                          <br />
-                          พิกัด: {address.latitude.toFixed(6)}, {address.longitude.toFixed(6)}
-                          {nearestBranch ? <><br />🏬 สาขาใกล้บ้าน: {nearestBranch.DC_TH}</> : null}
+                          🏬 สาขา: {dc.DC_TH} <br />
+                          {nearestBranch && nearestBranch.dc === dc.dc && "📌 ใกล้บ้านที่สุด"}
                         </Popup>
                       </Marker>
                     )
                   ))}
-
                 </MapContainer>
 
                 <div className="mt-2">
                   <input
                     type="text"
                     className="form-control"
-                    value={
-                      address?.latitude && address?.longitude
-                        ? `พิกัดบ้าน: ${address.latitude.toFixed(6)}, ${address.longitude.toFixed(6)}${nearestBranch ? ` | สาขาใกล้ที่สุด: ${nearestBranch.DC_TH}` : ""
-                        }`
-                        : "ยังไม่ได้ปักหมุด"
-                    }
+                    value={address?.latitude && address?.longitude ? `${address.latitude.toFixed(6)}, ${address.longitude.toFixed(6)}` : "ยังไม่ได้ปักหมุด"}
                     readOnly
                   />
                 </div>
